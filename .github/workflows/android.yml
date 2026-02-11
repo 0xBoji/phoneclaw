@@ -41,11 +41,11 @@ jobs:
       uses: android-actions/setup-android@v3
 
     - name: Install Android NDK
-      run: sdkmanager "ndk;27.0.12077973"
+      run: sdkmanager --install "ndk;26.1.10909125"
 
     - name: Build Rust .so libraries
       env:
-        ANDROID_NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/27.0.12077973
+        ANDROID_NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/26.1.10909125
       run: |
         cargo ndk \
           -t aarch64-linux-android \
@@ -63,9 +63,37 @@ jobs:
       working-directory: android
       run: gradle assembleDebug
 
-    - name: Upload APK
+    - name: Rename APK
+      run: |
+        mkdir -p release
+        cp android/app/build/outputs/apk/debug/*.apk release/PocketClaw-debug.apk
+
+    - name: Upload APK as artifact
       uses: actions/upload-artifact@v4
       with:
         name: PocketClaw-debug
-        path: android/app/build/outputs/apk/debug/*.apk
-        if-no-files-found: warn
+        path: release/PocketClaw-debug.apk
+
+    # Auto-create a rolling "latest" release with the APK
+    - name: Create/Update Release
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: latest
+        name: "PocketClaw Latest Build"
+        body: |
+          🦞 **PocketClaw Android APK** - Auto-built from `main` branch.
+          
+          **How to install:**
+          1. Download `PocketClaw-debug.apk` below
+          2. Transfer to your Android phone
+          3. Enable "Install from unknown sources" in Settings
+          4. Open the APK and install
+          
+          Built at: ${{ github.event.head_commit.timestamp }}
+          Commit: ${{ github.sha }}
+        files: release/PocketClaw-debug.apk
+        prerelease: true
+        make_latest: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
