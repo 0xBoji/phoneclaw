@@ -1,0 +1,81 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+
+    # Setup Java for Gradle
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    # Setup Rust
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        targets: aarch64-linux-android,armv7-linux-androideabi,x86_64-linux-android
+
+    # Cache Rust dependencies
+    - name: Cache Rust
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          target
+        key: ${{ runner.os }}-cargo-android-${{ hashFiles('**/Cargo.lock') }}
+
+    # Install cargo-ndk
+    - name: Install cargo-ndk
+      run: cargo install cargo-ndk
+
+    # Setup Android SDK/NDK
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+
+    - name: Install Android NDK
+      run: sdkmanager "ndk;27.0.12077973"
+
+    # Build Rust native libraries
+    - name: Build Rust .so libraries
+      env:
+        ANDROID_NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/27.0.12077973
+      run: |
+        cargo ndk \
+          -t aarch64-linux-android \
+          -t armv7-linux-androideabi \
+          -t x86_64-linux-android \
+          -o android/app/src/main/jniLibs \
+          build --release -p mobile-jni
+
+    # Build APK
+    - name: Build Debug APK
+      working-directory: android
+      run: |
+        chmod +x gradlew 2>/dev/null || true
+        # Use gradle wrapper or system gradle
+        if [ -f "gradlew" ]; then
+          ./gradlew assembleDebug
+        else
+          gradle assembleDebug
+        fi
+
+    # Upload APK as artifact (downloadable)
+    - name: Upload APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: PocketClaw-debug
+        path: android/app/build/outputs/apk/debug/*.apk
+        if-no-files-found: warn

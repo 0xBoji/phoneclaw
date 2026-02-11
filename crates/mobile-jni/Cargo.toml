@@ -1,0 +1,18 @@
+[package]
+name = "mobile-jni"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+jni = "0.21.1"
+android_logger = "0.13.3"
+log = "0.4"
+tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
+anyhow = { workspace = true }
+pocketclaw-cli = { path = "../cli" }
+pocketclaw-core = { path = "../core" }
