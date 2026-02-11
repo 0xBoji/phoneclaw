@@ -1,0 +1,16 @@
+[package]
+name = "microclaw-providers"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+microclaw-core = { workspace = true }
+async-trait.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+reqwest.workspace = true
+tracing.workspace = true
+thiserror.workspace = true
+anyhow.workspace = true

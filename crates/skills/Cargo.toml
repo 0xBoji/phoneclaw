@@ -1,0 +1,19 @@
+[package]
+name = "microclaw-skills"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+microclaw-core = { workspace = true }
+microclaw-tools = { workspace = true }
+async-trait.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+tracing.workspace = true
+thiserror.workspace = true
+anyhow.workspace = true
+walkdir.workspace = true
+regex.workspace = true
+which = "8.0.0"
