@@ -1,11 +1,13 @@
 [package]
 name = "pocketclaw-heartbeat"
-version = "0.1.0"
-edition = "2021"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
 
 [dependencies]
 tokio = { workspace = true }
 tracing = { workspace = true }
 chrono = { workspace = true }
-pocketclaw-core = { path = "../core" }
+pocketclaw-core = { workspace = true }
 uuid = { workspace = true, features = ["v4"] }

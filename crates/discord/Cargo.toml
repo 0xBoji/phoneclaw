@@ -1,12 +1,14 @@
 [package]
 name = "pocketclaw-discord"
-version = "0.1.0"
-edition = "2021"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
 
 [dependencies]
-pocketclaw-core = { path = "../core" }
+pocketclaw-core = { workspace = true }
 tokio = { workspace = true }
 tracing = { workspace = true }
 serenity = { version = "0.12", default-features = false, features = ["client", "gateway", "rustls_backend", "model"] }
 anyhow = { workspace = true }
-uuid = { version = "1.10.0", features = ["v4"] }
+uuid = { workspace = true, features = ["v4"] }
