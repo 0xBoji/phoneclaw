@@ -17,6 +17,7 @@ use pocketclaw_discord::DiscordBot;
 use pocketclaw_tools::exec_tool::ExecTool;
 use pocketclaw_tools::fs_tools::{ListDirTool, ReadFileTool, WriteFileTool};
 use pocketclaw_tools::registry::ToolRegistry;
+use pocketclaw_tools::sandbox::SandboxConfig;
 use pocketclaw_tools::web_fetch::WebFetchTool;
 use pocketclaw_tools::web_search::WebSearchTool;
 use std::path::PathBuf;
@@ -163,19 +164,25 @@ async fn main() -> anyhow::Result<()> {
     // ensure workspace exists
     tokio::fs::create_dir_all(&workspace).await?;
 
+    // Create Sandbox Config
+    let sandbox = SandboxConfig {
+        workspace_path: workspace.clone(),
+        exec_timeout_secs: 30,
+        max_output_bytes: 64 * 1024,
+        exec_enabled: true,
+        network_allowlist: Vec::new(),
+        ..Default::default()
+    };
+
     // Create Components
     let bus = Arc::new(MessageBus::new(100));
     let provider: Arc<dyn LLMProvider> = create_provider(&config)?;
 
     let tools = ToolRegistry::new();
-    tools
-        .register(Arc::new(ExecTool::new(
-            workspace.to_string_lossy().to_string(),
-        )))
-        .await;
-    tools.register(Arc::new(ReadFileTool)).await;
-    tools.register(Arc::new(WriteFileTool)).await;
-    tools.register(Arc::new(ListDirTool)).await;
+    tools.register(Arc::new(ExecTool::new(sandbox.clone()))).await;
+    tools.register(Arc::new(ReadFileTool::new(sandbox.clone()))).await;
+    tools.register(Arc::new(WriteFileTool::new(sandbox.clone()))).await;
+    tools.register(Arc::new(ListDirTool::new(sandbox.clone()))).await;
     tools.register(Arc::new(WebFetchTool::new())).await;
 
     if let Some(web_cfg) = &config.web {
@@ -187,7 +194,7 @@ async fn main() -> anyhow::Result<()> {
     }
 
     let context_builder = ContextBuilder::new(workspace.clone());
-    let sessions = SessionManager::new(workspace.clone());
+    let sessions = SessionManager::new(workspace.clone(), None);
 
     let agent = AgentLoop::new(
         bus.clone(),

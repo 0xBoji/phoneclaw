@@ -1,10 +1,21 @@
+use crate::sandbox::{SandboxConfig, validate_path};
 use crate::{Tool, ToolError};
 use async_trait::async_trait;
 use serde::Deserialize;
 use serde_json::{json, Value};
 use tokio::fs;
 
-pub struct WriteFileTool;
+// ─── Write File ───
+
+pub struct WriteFileTool {
+    sandbox: SandboxConfig,
+}
+
+impl WriteFileTool {
+    pub fn new(sandbox: SandboxConfig) -> Self {
+        Self { sandbox }
+    }
+}
 
 #[derive(Deserialize)]
 struct WriteFileArgs {
@@ -19,7 +30,7 @@ impl Tool for WriteFileTool {
     }
 
     fn description(&self) -> &str {
-        "Write content to a file at the specified path."
+        "Write content to a file at the specified path (workspace only)."
     }
 
     fn parameters(&self) -> Value {
@@ -28,7 +39,7 @@ impl Tool for WriteFileTool {
             "properties": {
                 "path": {
                     "type": "string",
-                    "description": "The path to the file to write."
+                    "description": "The path to the file to write (relative to workspace)."
                 },
                 "content": {
                     "type": "string",
@@ -43,15 +54,36 @@ impl Tool for WriteFileTool {
         let args: WriteFileArgs = serde_json::from_value(args)
             .map_err(|e| ToolError::InvalidArgs(e.to_string()))?;
 
-        fs::write(&args.path, &args.content)
-            .await
-            .map_err(|e: std::io::Error| ToolError::ExecutionError(e.to_string()))?;
+        let safe_path = validate_path(&self.sandbox.workspace_path, &args.path)?;
 
-        Ok(format!("Successfully wrote to {}", args.path))
+        // Create parent directories if needed
+        if let Some(parent) = safe_path.parent() {
+            if !parent.exists() {
+                fs::create_dir_all(parent)
+                    .await
+                    .map_err(|e| ToolError::ExecutionError(format!("Failed to create dirs: {}", e)))?;
+            }
+        }
+
+        fs::write(&safe_path, &args.content)
+            .await
+            .map_err(|e| ToolError::ExecutionError(e.to_string()))?;
+
+        Ok(format!("Successfully wrote to {}", safe_path.display()))
     }
 }
 
-pub struct ReadFileTool;
+// ─── Read File ───
+
+pub struct ReadFileTool {
+    sandbox: SandboxConfig,
+}
+
+impl ReadFileTool {
+    pub fn new(sandbox: SandboxConfig) -> Self {
+        Self { sandbox }
+    }
+}
 
 #[derive(Deserialize)]
 struct ReadFileArgs {
@@ -65,7 +97,7 @@ impl Tool for ReadFileTool {
     }
 
     fn description(&self) -> &str {
-        "Read content from a file at the specified path."
+        "Read content from a file at the specified path (workspace only)."
     }
 
     fn parameters(&self) -> Value {
@@ -74,7 +106,7 @@ impl Tool for ReadFileTool {
             "properties": {
                 "path": {
                     "type": "string",
-                    "description": "The path to the file to read."
+                    "description": "The path to the file to read (relative to workspace)."
                 }
             },
             "required": ["path"]
@@ -85,15 +117,27 @@ impl Tool for ReadFileTool {
         let args: ReadFileArgs = serde_json::from_value(args)
             .map_err(|e| ToolError::InvalidArgs(e.to_string()))?;
 
-        let content = fs::read_to_string(&args.path)
+        let safe_path = validate_path(&self.sandbox.workspace_path, &args.path)?;
+
+        let content = fs::read_to_string(&safe_path)
             .await
-            .map_err(|e: std::io::Error| ToolError::ExecutionError(e.to_string()))?;
+            .map_err(|e| ToolError::ExecutionError(e.to_string()))?;
 
         Ok(content)
     }
 }
 
-pub struct ListDirTool;
+// ─── List Directory ───
+
+pub struct ListDirTool {
+    sandbox: SandboxConfig,
+}
+
+impl ListDirTool {
+    pub fn new(sandbox: SandboxConfig) -> Self {
+        Self { sandbox }
+    }
+}
 
 #[derive(Deserialize)]
 struct ListDirArgs {
@@ -107,7 +151,7 @@ impl Tool for ListDirTool {
     }
 
     fn description(&self) -> &str {
-        "List files and directories in a given path."
+        "List files and directories in a given path (workspace only)."
     }
 
     fn parameters(&self) -> Value {
@@ -116,7 +160,7 @@ impl Tool for ListDirTool {
             "properties": {
                 "path": {
                     "type": "string",
-                    "description": "The path to the directory to list."
+                    "description": "The path to the directory to list (relative to workspace)."
                 }
             },
             "required": ["path"]
@@ -127,13 +171,22 @@ impl Tool for ListDirTool {
         let args: ListDirArgs = serde_json::from_value(args)
             .map_err(|e| ToolError::InvalidArgs(e.to_string()))?;
 
-        let mut entries = fs::read_dir(&args.path)
+        let safe_path = validate_path(&self.sandbox.workspace_path, &args.path)?;
+
+        let mut entries = fs::read_dir(&safe_path)
             .await
-            .map_err(|e: std::io::Error| ToolError::ExecutionError(e.to_string()))?;
+            .map_err(|e| ToolError::ExecutionError(e.to_string()))?;
 
         let mut result = String::new();
-        while let Some(entry) = entries.next_entry().await.map_err(|e: std::io::Error| ToolError::ExecutionError(e.to_string()))? {
-            let file_type = entry.file_type().await.map_err(|e: std::io::Error| ToolError::ExecutionError(e.to_string()))?;
+        while let Some(entry) = entries
+            .next_entry()
+            .await
+            .map_err(|e| ToolError::ExecutionError(e.to_string()))?
+        {
+            let file_type = entry
+                .file_type()
+                .await
+                .map_err(|e| ToolError::ExecutionError(e.to_string()))?;
             let name = entry.file_name().to_string_lossy().to_string();
             let type_str = if file_type.is_dir() { "DIR" } else { "FILE" };
             result.push_str(&format!("[{}] {}\n", type_str, name));

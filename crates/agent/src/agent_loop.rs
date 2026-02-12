@@ -142,12 +142,20 @@ impl AgentLoop {
                     info!("Executing tool: {}", tool_call.name);
                     
                     let result = if let Some(tool) = self.tools.get(&tool_call.name).await {
-                         match serde_json::from_str(&tool_call.arguments) {
-                             Ok(args) => match tool.execute(args).await {
-                                 Ok(res) => res,
-                                 Err(e) => format!("Error executing tool: {}", e),
-                             },
-                             Err(e) => format!("Error parsing arguments: {}", e),
+                         // Permission guard: check if tool is allowed
+                         // For now, allow all tools (empty list = all allowed).
+                         // When skills specify permissions, this will be populated.
+                         let allowed_tools: Vec<String> = Vec::new();
+                         if !ToolRegistry::is_tool_allowed(&tool_call.name, &allowed_tools) {
+                             format!("Permission denied: tool '{}' is not allowed", tool_call.name)
+                         } else {
+                             match serde_json::from_str(&tool_call.arguments) {
+                                 Ok(args) => match tool.execute(args).await {
+                                     Ok(res) => res,
+                                     Err(e) => format!("Error executing tool: {}", e),
+                                 },
+                                 Err(e) => format!("Error parsing arguments: {}", e),
+                             }
                          }
                     } else {
                         format!("Tool not found: {}", tool_call.name)

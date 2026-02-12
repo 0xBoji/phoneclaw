@@ -35,4 +35,32 @@ impl ToolRegistry {
             })
         }).collect()
     }
+
+    /// Return tool definitions filtered by an allowed-tools list.
+    /// If `allowed_tools` is empty, returns ALL tools (backward compatible).
+    pub async fn list_definitions_for_permissions(
+        &self,
+        allowed_tools: &[String],
+    ) -> Vec<serde_json::Value> {
+        if allowed_tools.is_empty() {
+            return self.list_definitions().await;
+        }
+        let tools = self.tools.read().await;
+        tools.values()
+            .filter(|t| allowed_tools.iter().any(|a| a == t.name()))
+            .map(|t| {
+                serde_json::json!({
+                    "name": t.name(),
+                    "description": t.description(),
+                    "parameters": t.parameters()
+                })
+            })
+            .collect()
+    }
+
+    /// Check if a tool name is in the allowed list.
+    /// If `allowed_tools` is empty, all tools are allowed (backward compatible).
+    pub fn is_tool_allowed(tool_name: &str, allowed_tools: &[String]) -> bool {
+        allowed_tools.is_empty() || allowed_tools.iter().any(|a| a == tool_name)
+    }
 }

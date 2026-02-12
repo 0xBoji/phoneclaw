@@ -3,6 +3,7 @@ pub mod web_search;
 pub mod registry;
 pub mod exec_tool;
 pub mod fs_tools;
+pub mod sandbox;
 use async_trait::async_trait;
 use serde_json::Value;
 use thiserror::Error;

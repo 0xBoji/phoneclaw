@@ -1,16 +1,18 @@
+use crate::sandbox::{SandboxConfig, truncate_output};
 use crate::{Tool, ToolError};
 use async_trait::async_trait;
 use serde::Deserialize;
 use serde_json::{json, Value};
 use tokio::process::Command;
+use tokio::time::{timeout, Duration};
 
 pub struct ExecTool {
-    workspace: String,
+    sandbox: SandboxConfig,
 }
 
 impl ExecTool {
-    pub fn new(workspace: String) -> Self {
-        Self { workspace }
+    pub fn new(sandbox: SandboxConfig) -> Self {
+        Self { sandbox }
     }
 }
 
@@ -43,37 +45,62 @@ impl Tool for ExecTool {
     }
 
     async fn execute(&self, args: Value) -> Result<String, ToolError> {
+        // Check if exec is enabled
+        if !self.sandbox.exec_enabled {
+            return Err(ToolError::ExecutionError(
+                "Command execution is disabled by sandbox policy".to_string(),
+            ));
+        }
+
         let args: ExecArgs = serde_json::from_value(args)
             .map_err(|e| ToolError::InvalidArgs(e.to_string()))?;
 
-        // Basic security check: prevent cd ..
+        // Block path traversal
         if args.command.contains("..") {
-            return Err(ToolError::ExecutionError("Command contains disallowed '..' sequence".to_string()));
+            return Err(ToolError::ExecutionError(
+                "Command contains disallowed '..' sequence".to_string(),
+            ));
         }
 
-        let output = Command::new("sh")
-            .arg("-c")
-            .arg(&args.command)
-            .current_dir(&self.workspace)
-            .output()
-            .await
-            .map_err(|e: std::io::Error| ToolError::ExecutionError(e.to_string()))?;
+        let deadline = Duration::from_secs(self.sandbox.exec_timeout_secs);
+        let workspace = self.sandbox.workspace_path.to_string_lossy().to_string();
 
-        let stdout = String::from_utf8_lossy(&output.stdout);
-        let stderr = String::from_utf8_lossy(&output.stderr);
+        // Execute with timeout
+        let result = timeout(deadline, async {
+            Command::new("sh")
+                .arg("-c")
+                .arg(&args.command)
+                .current_dir(&workspace)
+                .output()
+                .await
+        })
+        .await;
 
-        let mut result = String::new();
-        if !stdout.is_empty() {
-            result.push_str(&format!("STDOUT:\n{}\n", stdout));
-        }
-        if !stderr.is_empty() {
-            result.push_str(&format!("STDERR:\n{}\n", stderr));
-        }
+        match result {
+            Ok(Ok(output)) => {
+                let stdout = String::from_utf8_lossy(&output.stdout);
+                let stderr = String::from_utf8_lossy(&output.stderr);
 
-        if result.is_empty() {
-             Ok("(no output)".to_string())
-        } else {
-             Ok(result)
+                let mut result = String::new();
+                if !stdout.is_empty() {
+                    result.push_str(&format!("STDOUT:\n{}\n", stdout));
+                }
+                if !stderr.is_empty() {
+                    result.push_str(&format!("STDERR:\n{}\n", stderr));
+                }
+
+                if result.is_empty() {
+                    Ok("(no output)".to_string())
+                } else {
+                    // Truncate output to max_output_bytes
+                    Ok(truncate_output(&result, self.sandbox.max_output_bytes))
+                }
+            }
+            Ok(Err(e)) => Err(ToolError::ExecutionError(e.to_string())),
+            Err(_) => Err(ToolError::ExecutionError(format!(
+                "Command timed out after {}s",
+                self.sandbox.exec_timeout_secs
+            ))),
         }
     }
 }

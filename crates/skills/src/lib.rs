@@ -10,6 +10,7 @@ pub struct Skill {
     pub description: String,
     pub content: String,
     pub requirements: Option<SkillRequirements>,
+    pub permissions: Option<SkillPermissions>,
     pub always: bool,
     pub available: bool,
     pub missing_requirements: Vec<String>,
@@ -22,6 +23,7 @@ pub struct SkillMetadata {
     #[serde(default)]
     pub always: bool,
     pub requires: Option<SkillRequirements>,
+    pub permissions: Option<SkillPermissions>,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -30,6 +32,26 @@ pub struct SkillRequirements {
     pub bins: Vec<String>,
     #[serde(default)]
     pub env: Vec<String>,
+}
+
+/// Permission manifest for a skill — declares what the skill is allowed to do.
+#[derive(Debug, Clone, Deserialize, Default)]
+pub struct SkillPermissions {
+    /// Tool names this skill is allowed to use (e.g. ["exec_cmd", "read_file"]).
+    #[serde(default)]
+    pub tools: Vec<String>,
+    /// File system scope: "workspace" (default) or "system".
+    #[serde(default = "default_fs_scope")]
+    pub fs_scope: String,
+    /// Allowed network domains for web tools (e.g. ["api.github.com"]).
+    #[serde(default)]
+    pub network_domains: Vec<String>,
+    /// Override max exec timeout for this skill (seconds).
+    pub max_exec_timeout: Option<u64>,
+}
+
+fn default_fs_scope() -> String {
+    "workspace".to_string()
 }
 
 pub struct SkillsLoader {
@@ -75,6 +97,7 @@ impl SkillsLoader {
                 description: "No description provided".to_string(),
                 always: false,
                 requires: None,
+                permissions: None,
             });
 
         let (available, missing) = self.check_requirements(&metadata.requires);
@@ -84,6 +107,7 @@ impl SkillsLoader {
             description: metadata.description,
             content: body.to_string(),
             requirements: metadata.requires,
+            permissions: metadata.permissions,
             always: metadata.always,
             available,
             missing_requirements: missing,
