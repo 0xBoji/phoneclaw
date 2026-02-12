@@ -6,6 +6,11 @@ use pocketclaw_persistence::SqliteSessionStore;
 use crate::sheets::SheetsClient;
 use tracing::{error, info};
 
+pub struct Session {
+    pub history: Vec<Message>,
+    pub summary: Option<String>,
+}
+
 #[derive(Clone)]
 pub struct SessionManager {
     store: SqliteSessionStore,
