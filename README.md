@@ -1,30 +1,111 @@
-# PocketClaw (Rust + Android Local Gateway)
+# pocketclaw-rs (Android-First Local Gateway)
 
-PocketClaw is a local-first AI agent runtime designed to run on:
-- Linux/macOS servers
-- Termux on Android
-- Old Android phones as local gateway nodes
+`pocketclaw-rs` is a local-first AI agent runtime focused on Android devices, especially old phones used as always-on local gateway nodes.
 
-Main goal: users can configure an API key and start using the local gateway quickly.
+Primary goal: user only needs to set `provider + api key + model`, then start the gateway.
 
-## What You Get
+## Supported Usage Modes (Android only)
 
-- Local gateway API (`/api/message`, `/api/status`, `/api/monitor/metrics`, `/api/control/reload`)
-- Multi-provider LLM support (OpenAI, OpenRouter, Anthropic, Google, Groq)
-- Optional Telegram/Discord channels
-- Tool sandboxing (filesystem boundary, exec timeout, SSRF checks)
-- SQLite session persistence + audit logs
-- Android app with controller-style setup screens
+1. Android App (recommended)
+2. Termux on Android (optional)
 
 ---
 
-## 1) Quick Start (Desktop / Server)
+## 1) Android App (Recommended)
 
-### 1.1 Prerequisites
+This is the easiest path for non-technical users.
 
-- Rust stable toolchain
-- `clang` (recommended)
-- `git`
+### 1.1 Requirements
+
+- Android Studio (recommended for building APK)
+- Android SDK + NDK
+- Rust toolchain
+- `cargo-ndk`
+
+Install `cargo-ndk` if missing:
+
+```bash
+cargo install cargo-ndk
+```
+
+### 1.2 Clone repository
+
+```bash
+git clone https://github.com/0xBoji/pocketclaw-rs.git
+cd pocketclaw-rs
+```
+
+### 1.3 Build native libraries and APK
+
+Build Rust Android libraries:
+
+```bash
+./build_android.sh
+```
+
+Build APK:
+
+```bash
+cd android
+# Build with Android Studio or your Gradle setup
+gradle assembleDebug
+```
+
+If Gradle says SDK path is missing, create `android/local.properties`:
+
+```properties
+sdk.dir=/absolute/path/to/Android/sdk
+```
+
+### 1.4 Install and configure app
+
+After installing APK, open app and complete setup screens:
+
+1. Workspace Creator
+2. Provider & Secrets Manager
+3. Channel Chat Setup
+4. Skill Manifest Viewer & Permissions
+5. Agent Control Dashboard
+6. Resource & Log Monitor
+7. Safety & Sandbox Toggles
+
+Minimum required fields:
+- Provider
+- API key
+- Model
+
+Then open **Agent Control Dashboard** and press **Start Server**.
+
+### 1.5 Verify local gateway
+
+Use phone-local API endpoint:
+
+```bash
+curl http://127.0.0.1:8080/health
+curl http://127.0.0.1:8080/api/status
+curl http://127.0.0.1:8080/api/monitor/metrics
+```
+
+Send a message:
+
+```bash
+curl -X POST http://127.0.0.1:8080/api/message \
+  -H "Content-Type: application/json" \
+  -d '{"message":"Hello from Android local gateway"}'
+```
+
+---
+
+## 2) Termux on Android (Optional)
+
+Use this if you want CLI-first operation directly inside Termux.
+
+### 2.1 Install dependencies
+
+```bash
+pkg update && pkg upgrade -y
+pkg install -y git curl clang make pkg-config openssl
+```
 
 Install Rust:
 
@@ -33,91 +114,15 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 source "$HOME/.cargo/env"
 ```
 
-### 1.2 Clone and Build
+### 2.2 Clone and build
 
 ```bash
-git clone https://github.com/0xBoji/microclaw.git
-cd microclaw
+git clone https://github.com/0xBoji/pocketclaw-rs.git
+cd pocketclaw-rs
 cargo build --release
 ```
 
-### 1.3 Create Config (`~/.pocketclaw/config.json`)
-
-```bash
-mkdir -p ~/.pocketclaw
-mkdir -p ~/pocketclaw-workspace
-
-cat > ~/.pocketclaw/config.json << 'JSON'
-{
-  "workspace": "/Users/YOUR_USER/pocketclaw-workspace",
-  "agents": {
-    "default": {
-      "model": "gpt-4o-mini",
-      "system_prompt": "You are a helpful assistant.",
-      "max_tokens": 4096,
-      "temperature": 0.7
-    }
-  },
-  "providers": {
-    "openai": {
-      "api_key": "YOUR_OPENAI_API_KEY",
-      "model": "gpt-4o-mini"
-    }
-  }
-}
-JSON
-```
-
-Replace:
-- `workspace` with your real absolute path
-- `YOUR_OPENAI_API_KEY` with your key
-
-### 1.4 Start Gateway
-
-```bash
-./target/release/pocketclaw-cli gateway
-```
-
-### 1.5 Test API
-
-```bash
-curl http://127.0.0.1:8080/health
-curl http://127.0.0.1:8080/api/status
-
-curl -X POST http://127.0.0.1:8080/api/message \
-  -H "Content-Type: application/json" \
-  -d '{"message":"Hello from local gateway"}'
-```
-
----
-
-## 2) Termux Setup (Android CLI Mode)
-
-Use this if you want to run PocketClaw directly inside Termux.
-
-### 2.1 Install Dependencies
-
-```bash
-pkg update && pkg upgrade -y
-pkg install -y git curl clang make pkg-config openssl
-```
-
-Install Rust in Termux:
-
-```bash
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-source "$HOME/.cargo/env"
-```
-
-### 2.2 Build
-
-```bash
-git clone https://github.com/0xBoji/microclaw.git
-cd microclaw
-cargo build --release
-```
-
-### 2.3 Create Config
+### 2.3 Create config
 
 ```bash
 mkdir -p ~/.pocketclaw
@@ -144,88 +149,19 @@ cat > ~/.pocketclaw/config.json << 'JSON'
 JSON
 ```
 
-### 2.4 Run Gateway in Termux
+### 2.4 Run gateway
 
 ```bash
 ./target/release/pocketclaw-cli gateway
 ```
 
-If you need 24/7 process management, use `tmux` or run via `pocketclaw-supervisor`.
-
 ---
 
-## 3) Android App Setup (Old Phones as Local Gateway)
+## 3) Configuration Notes
 
-PocketClaw includes an Android app and JNI bridge for local gateway control.
+### 3.1 Provider examples
 
-### 3.1 Build Native + APK
-
-Requirements:
-- Android Studio (recommended)
-- Android SDK + NDK
-- Rust + `cargo-ndk`
-
-Build native libs:
-
-```bash
-./build_android.sh
-```
-
-Then build APK:
-
-```bash
-cd android
-# Use Android Studio or Gradle wrapper (if present in your env)
-gradle assembleDebug
-```
-
-### 3.2 Install and Configure in App
-
-The app provides controller screens:
-1. Workspace Creator
-2. Provider & Secrets Manager
-3. Channel Chat Setup
-4. Skill Manifest Viewer & Permissions
-5. Agent Control Dashboard (Start/Stop)
-6. Resource & Log Monitor
-7. Safety & Sandbox Toggles
-
-Minimum required input:
-- Provider
-- API key
-- Model
-
-Then tap Start in dashboard.
-
----
-
-## 4) Common CLI Commands
-
-```bash
-# Interactive agent message
-./target/release/pocketclaw-cli agent -m "Summarize my workspace"
-
-# Gateway
-./target/release/pocketclaw-cli gateway
-
-# Status
-./target/release/pocketclaw-cli status
-
-# Onboarding wizard
-./target/release/pocketclaw-cli onboard
-
-# Cron
-./target/release/pocketclaw-cli cron list
-./target/release/pocketclaw-cli cron add --name "heartbeat" --message "check tasks" --every 300
-```
-
----
-
-## 5) Configuration Notes
-
-### 5.1 Providers
-
-Example OpenRouter section:
+OpenRouter example:
 
 ```json
 {
@@ -239,7 +175,7 @@ Example OpenRouter section:
 }
 ```
 
-### 5.2 Optional Integrations
+### 3.2 Optional integrations
 
 ```json
 {
@@ -258,46 +194,42 @@ Example OpenRouter section:
 
 ---
 
-## 6) Security Defaults
+## 4) Security Defaults
 
-- If gateway auth token is not set, server binds to localhost only.
+- If gateway auth token is not set, gateway binds to localhost only.
 - Tools are permission-gated by approved skills.
 - Filesystem tool access is constrained to workspace.
-- Web fetch includes SSRF checks against private/reserved ranges.
+- Web fetch includes SSRF checks for private/reserved IP ranges.
 
 ---
 
-## 7) Troubleshooting
+## 5) Troubleshooting
 
 ### `Failed to load config`
 - Check `~/.pocketclaw/config.json` exists and valid JSON.
 
 ### Android build error: `SDK location not found`
-- Set `ANDROID_HOME`, or create `android/local.properties`:
-
-```properties
-sdk.dir=/absolute/path/to/Android/sdk
-```
+- Set `ANDROID_HOME`, or create `android/local.properties` with `sdk.dir`.
 
 ### Termux runtime issues
-- Ensure `source "$HOME/.cargo/env"`
-- Rebuild after updates: `cargo clean && cargo build --release`
+- Ensure `source "$HOME/.cargo/env"`.
+- Rebuild if needed: `cargo clean && cargo build --release`.
 
 ---
 
-## 8) Project Layout
+## 6) Project layout
 
 - `crates/core` - shared types/config/security primitives
-- `crates/agent` - agent loop, context building, sessions
-- `crates/tools` - exec/fs/web tools and sandbox controls
+- `crates/agent` - agent loop, context, session handling
+- `crates/tools` - tool system + sandbox controls
 - `crates/providers` - LLM provider adapters
 - `crates/server` - HTTP gateway
-- `crates/cli` - command entrypoint and onboarding
-- `crates/mobile-jni` - Android JNI bridge
+- `crates/cli` - CLI entrypoint
+- `crates/mobile-jni` - JNI bridge for Android app
 - `android/` - Android app project
 
 ---
 
-## 9) License
+## License
 
 MIT
