@@ -1,7 +1,7 @@
 use inquire::{Confirm, Password, Select, Text};
 use pocketclaw_core::config::{
     AgentDefaultConfig, AgentsConfig, AnthropicConfig, AppConfig, DiscordConfig, GoogleConfig,
-    GroqConfig, ProviderConfig, ProvidersConfig, TelegramConfig, WebConfig,
+    GroqConfig, ProviderConfig, ProvidersConfig, TelegramConfig, WebConfig, AttachmentPolicy
 };
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -156,6 +156,7 @@ pub fn run_onboarding() -> anyhow::Result<()> {
         discord: discord_config,
         web: web_config,
         google_sheets: None,
+        attachment_policy: AttachmentPolicy::default(),
     };
 
     let config_json = serde_json::to_string_pretty(&config)?;

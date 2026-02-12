@@ -102,7 +102,11 @@ pub async fn start_server(config_path: Option<PathBuf>) -> anyhow::Result<()> {
         None
     };
 
-    let sessions = SessionManager::new(workspace.clone(), sheets_client);
+    let db_path = workspace.join("pocketclaw.db");
+    let store_url = format!("sqlite://{}?mode=rwc", db_path.display());
+    let store = pocketclaw_persistence::SqliteSessionStore::new(&store_url).await?;
+
+    let sessions = SessionManager::new(store, sheets_client);
 
     let agent = AgentLoop::new(
         bus.clone(),

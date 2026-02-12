@@ -14,9 +14,7 @@ use tracing::{info, warn};
 use uuid::Uuid;
 use axum::extract::{Multipart, DefaultBodyLimit};
 use pocketclaw_core::attachment::AttachmentPolicy;
-use pocketclaw_core::types::{Attachment, AttachmentKind};
 use tokio::io::AsyncWriteExt;
-use std::path::{Path, PathBuf};
 
 #[derive(Clone)]
 struct AppState {
@@ -65,6 +63,7 @@ struct SendMessageResponse {
 }
 
 #[derive(Serialize)]
+#[allow(dead_code)]
 struct ErrorResponse {
     error: String,
 }

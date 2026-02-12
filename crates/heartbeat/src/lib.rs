@@ -7,7 +7,6 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use tokio::time::{interval, Duration};
 use tracing::{error, info};
-use uuid::Uuid;
 
 pub struct HeartbeatService {
     workspace: PathBuf,

@@ -8,7 +8,6 @@ use serenity::prelude::*;
 use std::sync::Arc;
 
 use tracing::{error, info};
-use uuid::Uuid;
 
 struct Handler {
     bus: Arc<MessageBus>,

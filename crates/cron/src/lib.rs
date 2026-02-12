@@ -8,7 +8,6 @@ use pocketclaw_core::bus::{Event, MessageBus};
 use pocketclaw_core::types::{Message, Role};
 use tokio::time::{interval, Duration};
 use tracing::{error, info};
-use uuid::Uuid;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CronSchedule {

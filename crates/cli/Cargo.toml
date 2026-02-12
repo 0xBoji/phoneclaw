@@ -18,6 +18,7 @@ pocketclaw-tools = { workspace = true }
 pocketclaw-telegram = { workspace = true }
 pocketclaw-discord = { workspace = true }
 anyhow.workspace = true
+tokio.workspace = true
 clap = { version = "4.4", features = ["derive"] }
 inquire = "0.9.3"
 dirs = "6.0.0"

@@ -6,7 +6,6 @@ use teloxide::prelude::*;
 use teloxide::types::{ChatAction, ParseMode};
 use async_trait::async_trait;
 use tracing::{error, info, warn};
-use uuid::Uuid;
 
 pub struct TelegramBot {
     bus: Arc<MessageBus>,
