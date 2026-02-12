@@ -301,6 +301,10 @@ class SetupActivity : AppCompatActivity() {
         val providerObj = JSONObject().apply {
             put("api_key", apiKey)
             put("model", model)
+            // Set api_base for providers that need custom endpoints
+            when (provider) {
+                "openrouter" -> put("api_base", "https://openrouter.ai/api/v1")
+            }
         }
 
         val providersObj = JSONObject().apply {
