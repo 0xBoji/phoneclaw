@@ -2,6 +2,10 @@ use pocketclaw_core::types::{Message, Role};
 use pocketclaw_skills::SkillsLoader;
 use std::path::PathBuf;
 
+/// Maximum number of conversation history messages to include in context.
+/// This prevents exceeding LLM token limits as conversations grow.
+const MAX_HISTORY_MESSAGES: usize = 20;
+
 pub struct ContextBuilder {
     workspace: PathBuf,
     skills_loader: SkillsLoader,
@@ -32,8 +36,7 @@ impl ContextBuilder {
              messages.push(Message::new("system", "global", Role::System, &format!("Previous conversation summary: {}", s)));
         }
 
-        // 3. Relevant Skills (Simplified: just load always-on skills for now)
-        // In a real implementation, we would use vector search or keywords to find relevant skills.
+        // 3. Relevant Skills (load always-on skills)
         let skills = self.skills_loader.list_skills();
         for skill in skills {
             if skill.always && skill.available {
@@ -41,8 +44,23 @@ impl ContextBuilder {
             }
         }
 
-        // 4. Conversation History
-        messages.extend_from_slice(history);
+        // 4. Conversation History (sliding window — only last N messages)
+        let history_window = if history.len() > MAX_HISTORY_MESSAGES {
+            // Include a note that older messages were trimmed
+            messages.push(Message::new(
+                "system",
+                "global",
+                Role::System,
+                &format!(
+                    "[{} older messages omitted — see summary above for context]",
+                    history.len() - MAX_HISTORY_MESSAGES
+                ),
+            ));
+            &history[history.len() - MAX_HISTORY_MESSAGES..]
+        } else {
+            history
+        };
+        messages.extend_from_slice(history_window);
 
         // 5. Current Message
         messages.push(Message::new("cli", "current", Role::User, current_message));

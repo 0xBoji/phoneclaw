@@ -4,6 +4,12 @@ use std::path::{Path, PathBuf};
 use std::sync::{Arc, RwLock};
 use std::time::{SystemTime, UNIX_EPOCH};
 
+use pocketclaw_core::bus::{Event, MessageBus};
+use pocketclaw_core::types::{Message, Role};
+use tokio::time::{interval, Duration};
+use tracing::{error, info};
+use uuid::Uuid;
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CronSchedule {
     pub kind: String,
@@ -202,4 +208,88 @@ impl CronService {
             store.jobs.iter().filter(|j| j.enabled).cloned().collect()
         }
     }
+
+    /// Start the cron tick loop — checks every 10 seconds for due jobs and fires them.
+    pub fn start_loop(self: Arc<Self>, bus: Arc<MessageBus>) -> tokio::task::JoinHandle<()> {
+        tokio::spawn(async move {
+            info!("Cron tick loop started (10s interval)");
+            let mut ticker = interval(Duration::from_secs(10));
+
+            loop {
+                ticker.tick().await;
+                self.tick(&bus);
+            }
+        })
+    }
+
+    /// Check all enabled jobs and fire any that are due.
+    fn tick(&self, bus: &Arc<MessageBus>) {
+        let now = now_ms();
+        let mut to_delete = Vec::new();
+
+        {
+            let mut store = self.store.write().unwrap();
+            for job in store.jobs.iter_mut() {
+                if !job.enabled {
+                    continue;
+                }
+
+                let due = match job.state.next_run_at_ms {
+                    Some(next) => next <= now,
+                    None => false,
+                };
+
+                if !due {
+                    continue;
+                }
+
+                info!(job_id = %job.id, job_name = %job.name, "Firing cron job");
+
+                // Build and publish message
+                let session_key = job
+                    .payload
+                    .channel
+                    .as_deref()
+                    .map(|ch| format!("cron:{}", ch))
+                    .unwrap_or_else(|| format!("cron:{}", job.id));
+
+                let msg = Message {
+                    id: Uuid::new_v4(),
+                    channel: "cron".to_string(),
+                    session_key,
+                    content: job.payload.message.clone(),
+                    role: Role::User,
+                    metadata: Default::default(),
+                };
+
+                if let Err(e) = bus.publish(Event::InboundMessage(msg)) {
+                    error!(job_id = %job.id, "Failed to publish cron job: {}", e);
+                    job.state.last_status = Some("error".to_string());
+                    job.state.last_error = Some(e.to_string());
+                } else {
+                    job.state.last_status = Some("ok".to_string());
+                    job.state.last_error = None;
+                }
+
+                job.state.last_run_at_ms = Some(now);
+                job.updated_at_ms = now;
+
+                // Compute next run
+                job.state.next_run_at_ms = Self::compute_next_run(&job.schedule, now);
+
+                if job.delete_after_run {
+                    to_delete.push(job.id.clone());
+                }
+            }
+
+            // Remove one-shot jobs
+            if !to_delete.is_empty() {
+                store.jobs.retain(|j| !to_delete.contains(&j.id));
+            }
+        }
+
+        // Persist updated state
+        let _ = self.save_store();
+    }
 }
+

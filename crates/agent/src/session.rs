@@ -147,4 +147,39 @@ impl SessionManager {
         
         self.save_session(session_key, session).await;
     }
+
+    /// Auto-summarize and trim history when it exceeds the threshold.
+    /// Keeps the last `keep` messages and compresses older ones into summary.
+    pub async fn auto_trim_history(&self, session_key: &str, keep: usize) {
+        let mut sessions = self.sessions.write().await;
+        let session = sessions.entry(session_key.to_string()).or_insert_with(Session::default);
+
+        if session.history.len() <= keep {
+            return;
+        }
+
+        // Split: older messages get summarized, recent ones stay
+        let split_at = session.history.len() - keep;
+        let older: Vec<_> = session.history.drain(..split_at).collect();
+
+        // Build a simple summary from older messages
+        let mut summary_parts = Vec::new();
+        if let Some(existing) = &session.summary {
+            summary_parts.push(existing.clone());
+        }
+        for msg in &older {
+            let role = format!("{:?}", msg.role);
+            // Truncate long messages in summary
+            let content = if msg.content.len() > 100 {
+                format!("{}...", &msg.content[..100])
+            } else {
+                msg.content.clone()
+            };
+            summary_parts.push(format!("[{}] {}", role, content));
+        }
+        session.summary = Some(summary_parts.join("\n"));
+
+        // Persist trimmed session
+        self.save_session(session_key, session).await;
+    }
 }
