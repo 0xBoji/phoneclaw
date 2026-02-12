@@ -181,6 +181,7 @@ impl AgentLoop {
                         "iteration": iteration
                     })
                 );
+            }
 
             // Add assistant response to context
             current_messages.push(Message::new(
