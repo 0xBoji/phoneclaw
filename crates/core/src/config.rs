@@ -10,6 +10,7 @@ pub struct AppConfig {
     pub telegram: Option<TelegramConfig>,
     pub discord: Option<DiscordConfig>,
     pub web: Option<WebConfig>,
+    pub google_sheets: Option<GoogleSheetsConfig>,
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
@@ -20,6 +21,12 @@ pub struct DiscordConfig {
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct WebConfig {
     pub brave_key: Option<String>,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct GoogleSheetsConfig {
+    pub spreadsheet_id: String,
+    pub service_account_json: String,
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]

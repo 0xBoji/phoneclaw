@@ -17,3 +17,10 @@ tokio.workspace = true
 tracing.workspace = true
 thiserror.workspace = true
 anyhow.workspace = true
+google-sheets4 = "7.0.0"
+yup-oauth2 = "12.1.2"
+hyper = "1.8.1"
+hyper-rustls = { version = "0.27.7", features = ["http2"] }
+reqwest = { workspace = true, features = ["json", "rustls-tls"] }
+uuid = { workspace = true, features = ["v4"] }
+hyper-util = "0.1.20"

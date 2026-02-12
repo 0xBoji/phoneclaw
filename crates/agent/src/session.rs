@@ -7,6 +7,8 @@ use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 use tokio::fs;
 
+use crate::sheets::SheetsClient;
+
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct Session {
     pub history: Vec<Message>,
@@ -16,24 +18,44 @@ pub struct Session {
 pub struct SessionManager {
     sessions: Arc<RwLock<HashMap<String, Session>>>,
     storage_path: PathBuf,
+    sheets_client: Option<SheetsClient>,
 }
 
 impl SessionManager {
-    pub fn new(workspace: PathBuf) -> Self {
+    pub fn new(workspace: PathBuf, sheets_client: Option<SheetsClient>) -> Self {
         let storage_path = workspace.join("sessions");
-        
-        // Ensure sessions directory exists
-        // Note: active waiting for async in new() is not ideal, but acceptable for initialization
-        // Better: Make new() async or have an init() method. 
-        // For simplicity in this architecture, we'll assume the caller ensures the directory or we do it lazily.
         
         Self {
             sessions: Arc::new(RwLock::new(HashMap::new())),
             storage_path,
+            sheets_client,
         }
     }
 
     async fn load_session(&self, session_key: &str) -> Session {
+        // Try to load from Google Sheets first if configured
+        if let Some(client) = &self.sheets_client {
+            match client.load_session(session_key).await {
+                Ok(Some(session)) => {
+                    // Update local file cache for redundancy
+                    self.save_session_local(session_key, &session).await;
+                    return session;
+                }
+                Ok(None) => {
+                    // Sheet doesn't exist, proceed to local (maybe new session or local only)
+                }
+                Err(e) => {
+                    tracing::error!("Failed to load session from Google Sheets: {}", e);
+                    // Fallback to local
+                }
+            }
+        }
+
+        // Fallback to local file
+        self.load_session_local(session_key).await
+    }
+
+    async fn load_session_local(&self, session_key: &str) -> Session {
         let safe_key = session_key.replace(":", "_");
         let file_path = self.storage_path.join(format!("{}.json", safe_key));
         
@@ -48,6 +70,13 @@ impl SessionManager {
     }
     
     async fn save_session(&self, session_key: &str, session: &Session) {
+        // Save locally
+        self.save_session_local(session_key, session).await;
+        
+        // TODO: Sync summary updates to Google Sheets (requires update_summary in sheets.rs)
+    }
+
+    async fn save_session_local(&self, session_key: &str, session: &Session) {
         if !self.storage_path.exists() {
              let _ = fs::create_dir_all(&self.storage_path).await;
         }
@@ -67,7 +96,7 @@ impl SessionManager {
             return session.history.clone();
         }
         
-        // Try load from disk
+        // Try load from disk / sheets
         let session = self.load_session(session_key).await;
         let history = session.history.clone();
         sessions.insert(session_key.to_string(), session);
@@ -78,11 +107,23 @@ impl SessionManager {
     pub async fn add_message(&self, session_key: &str, message: Message) {
         let mut sessions = self.sessions.write().await;
         let session = sessions.entry(session_key.to_string()).or_insert_with(Session::default);
-        session.history.push(message);
+        session.history.push(message.clone());
         
         // Persist to disk
-        // Optimization: In a real app, this should be debounced or done in background
-        self.save_session(session_key, session).await;
+        self.save_session_local(session_key, session).await;
+
+        // Persist to sheets (append only new message)
+        if let Some(client) = &self.sheets_client {
+            // We spawn this to not block the main loop latency
+            let client = client.clone();
+            let session_key = session_key.to_string();
+            let msg = message.clone();
+            tokio::spawn(async move {
+                if let Err(e) = client.append_message(&session_key, &msg).await {
+                    tracing::error!("Failed to append to Google Sheets: {}", e);
+                }
+            });
+        }
     }
 
     pub async fn get_summary(&self, session_key: &str) -> Option<String> {

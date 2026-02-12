@@ -96,7 +96,29 @@ pub async fn start_server(config_path: Option<PathBuf>) -> anyhow::Result<()> {
     }
 
     let context_builder = ContextBuilder::new(workspace.clone());
-    let sessions = SessionManager::new(workspace.clone());
+
+    // Initialize Google Sheets Client if configured
+    let sheets_client = if let Some(sheets_cfg) = &config.google_sheets {
+        match pocketclaw_agent::sheets::SheetsClient::new(
+            sheets_cfg.service_account_json.clone(),
+            sheets_cfg.spreadsheet_id.clone(),
+        )
+        .await
+        {
+            Ok(client) => {
+                info!("Google Sheets memory enabled");
+                Some(client)
+            }
+            Err(e) => {
+                error!("Failed to initialize Google Sheets client: {}", e);
+                None
+            }
+        }
+    } else {
+        None
+    };
+
+    let sessions = SessionManager::new(workspace.clone(), sheets_client);
 
     let agent = AgentLoop::new(
         bus.clone(),

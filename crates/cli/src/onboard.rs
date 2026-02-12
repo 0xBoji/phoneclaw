@@ -155,6 +155,7 @@ pub fn run_onboarding() -> anyhow::Result<()> {
         telegram: telegram_config,
         discord: discord_config,
         web: web_config,
+        google_sheets: None,
     };
 
     let config_json = serde_json::to_string_pretty(&config)?;

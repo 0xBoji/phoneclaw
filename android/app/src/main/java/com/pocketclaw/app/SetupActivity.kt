@@ -121,6 +121,40 @@ class SetupActivity : AppCompatActivity() {
         layout.addView(createHint("Get from brave.com/search/api"))
         layout.addView(createSpacer())
 
+        // ─── Section: Voice / Groq (Optional) ───
+        layout.addView(createSectionHeader("🎙️ Voice (Groq - Optional)"))
+
+        layout.addView(createLabel("Groq API Key"))
+        val groqInput = createInput("gsk_...", InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD)
+        existingConfig?.optString("_groq_key")?.let { if (it.isNotEmpty()) groqInput.setText(it) }
+        layout.addView(groqInput)
+        layout.addView(createHint("Required for voice features"))
+        layout.addView(createSpacer())
+
+        // ─── Section: Google Sheets Memory (Optional) ───
+        layout.addView(createSectionHeader("📊 Google Sheets Memory (Optional)"))
+
+        layout.addView(createLabel("Spreadsheet ID"))
+        val sheetIdInput = createInput("1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms")
+        existingConfig?.optJSONObject("google_sheets")?.let { 
+            sheetIdInput.setText(it.optString("spreadsheet_id", ""))
+        }
+        layout.addView(sheetIdInput)
+        layout.addView(createHint("From docs.google.com/spreadsheets/d/..."))
+        layout.addView(createSpacer())
+        
+        layout.addView(createLabel("Service Account JSON"))
+        val serviceAccountInput = createInput("Paste contents of service-account.json", InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE).apply {
+            minLines = 3
+            gravity = Gravity.TOP or Gravity.START
+        }
+        existingConfig?.optJSONObject("google_sheets")?.let { 
+            serviceAccountInput.setText(it.optString("service_account_json", ""))
+        }
+        layout.addView(serviceAccountInput)
+        layout.addView(createHint("Must have Editor access to the sheet"))
+        layout.addView(createSpacer())
+
         // ─── Config File Path (Debug Info) ───
         val configFile = File(filesDir, ".pocketclaw/config.json")
         layout.addView(TextView(this).apply {
@@ -145,6 +179,10 @@ class SetupActivity : AppCompatActivity() {
                 val telegramToken = telegramInput.text.toString().trim()
                 val discordToken = discordInput.text.toString().trim()
                 val braveKey = braveKeyInput.text.toString().trim()
+                
+                val sheetId = sheetIdInput.text.toString().trim()
+                val serviceAccount = serviceAccountInput.text.toString().trim()
+                val groqKey = groqInput.text.toString().trim()
 
                 if (apiKey.isEmpty()) {
                     Toast.makeText(this@SetupActivity, "API Key is required!", Toast.LENGTH_SHORT).show()
@@ -162,7 +200,10 @@ class SetupActivity : AppCompatActivity() {
                     systemPrompt = prompt.ifEmpty { "You are a helpful AI assistant." },
                     telegramToken = telegramToken,
                     discordToken = discordToken,
-                    braveKey = braveKey
+                    braveKey = braveKey,
+                    sheetId = sheetId,
+                    serviceAccount = serviceAccount,
+                    groqKey = groqKey
                 )
                 Toast.makeText(this@SetupActivity, "✅ Config saved!", Toast.LENGTH_SHORT).show()
 
@@ -175,7 +216,7 @@ class SetupActivity : AppCompatActivity() {
         scrollView.addView(layout)
         setContentView(scrollView)
     }
-
+    
     private fun loadExistingConfig(): JSONObject? {
         val configFile = File(filesDir, ".pocketclaw/config.json")
         if (!configFile.exists()) return null
@@ -185,17 +226,40 @@ class SetupActivity : AppCompatActivity() {
             val result = JSONObject()
 
             // Extract provider info
+            // Extract provider info
             val providers = json.optJSONObject("providers")
             if (providers != null) {
-                val keys = providers.keys()
-                if (keys.hasNext()) {
-                    val providerName = keys.next()
-                    result.put("_provider", providerName)
-                    val providerObj = providers.optJSONObject(providerName)
-                    if (providerObj != null) {
-                        result.put("_api_key", providerObj.optString("api_key", ""))
-                        result.put("_model", providerObj.optString("model", ""))
+                // Find main provider (openai, google, anthropic, or groq if it's the only one)
+                val priorityList = listOf("openai", "google", "anthropic", "openrouter", "groq")
+                var providerFound = false
+                for (p in priorityList) {
+                    if (providers.has(p)) {
+                        result.put("_provider", p)
+                        val pObj = providers.optJSONObject(p)
+                        if (pObj != null) {
+                            result.put("_api_key", pObj.optString("api_key", ""))
+                            result.put("_model", pObj.optString("model", ""))
+                        }
+                        providerFound = true
+                        break
                     }
+                }
+                
+                if (!providerFound) {
+                    val keys = providers.keys()
+                    if (keys.hasNext()) {
+                        val p = keys.next()
+                        result.put("_provider", p)
+                        val pObj = providers.optJSONObject(p)
+                        result.put("_api_key", pObj?.optString("api_key", "") ?: "")
+                        result.put("_model", pObj?.optString("model", "") ?: "")
+                    }
+                }
+
+                // Explicitly extract Groq key for Voice section
+                val groqObj = providers.optJSONObject("groq")
+                if (groqObj != null) {
+                    result.put("_groq_key", groqObj.optString("api_key", ""))
                 }
             }
 
@@ -223,63 +287,16 @@ class SetupActivity : AppCompatActivity() {
             if (web != null) {
                 result.put("_brave_key", web.optString("brave_key", ""))
             }
+            
+            // Extract Google Sheets
+            val sheets = json.optJSONObject("google_sheets")
+            if (sheets != null) {
+                result.put("google_sheets", sheets)
+            }
 
             result
         } catch (e: Exception) {
             null
-        }
-    }
-
-    private fun createSectionHeader(text: String): TextView {
-        return TextView(this).apply {
-            this.text = text
-            textSize = 20f
-            setTextColor(Color.WHITE)
-            typeface = Typeface.DEFAULT_BOLD
-            setPadding(0, 32, 0, 16)
-        }
-    }
-
-    private fun createLabel(text: String): TextView {
-        return TextView(this).apply {
-            this.text = text
-            textSize = 16f
-            setTextColor(Color.parseColor("#e94560"))
-            typeface = Typeface.DEFAULT_BOLD
-            setPadding(0, 0, 0, 8)
-        }
-    }
-
-    private fun createHint(text: String): TextView {
-        return TextView(this).apply {
-            this.text = text
-            textSize = 12f
-            setTextColor(Color.parseColor("#666666"))
-            setPadding(0, 4, 0, 0)
-        }
-    }
-
-    private fun createInput(hint: String, type: Int = InputType.TYPE_CLASS_TEXT): EditText {
-        return EditText(this).apply {
-            this.hint = hint
-            this.inputType = type
-            textSize = 16f
-            setTextColor(Color.WHITE)
-            setHintTextColor(Color.parseColor("#666666"))
-            setBackgroundColor(Color.parseColor("#16213e"))
-            setPadding(24, 20, 24, 20)
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            )
-        }
-    }
-
-    private fun createSpacer(): View {
-        return View(this).apply {
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT, 24
-            )
         }
     }
 
@@ -290,7 +307,10 @@ class SetupActivity : AppCompatActivity() {
         systemPrompt: String,
         telegramToken: String,
         discordToken: String,
-        braveKey: String
+        braveKey: String,
+        sheetId: String,
+        serviceAccount: String,
+        groqKey: String
     ) {
         val configDir = File(filesDir, ".pocketclaw")
         if (!configDir.exists()) configDir.mkdirs()
@@ -307,8 +327,13 @@ class SetupActivity : AppCompatActivity() {
             }
         }
 
-        val providersObj = JSONObject().apply {
-            put(provider, providerObj)
+        val providersObj = JSONObject()
+        providersObj.put(provider, providerObj)
+        
+        if (groqKey.isNotEmpty() && provider != "groq") {
+            providersObj.put("groq", JSONObject().apply { 
+                put("api_key", groqKey) 
+            })
         }
 
         val agentsObj = JSONObject().apply {
@@ -342,6 +367,13 @@ class SetupActivity : AppCompatActivity() {
                     put("brave_key", braveKey)
                 })
             }
+            
+            if (sheetId.isNotEmpty() && serviceAccount.isNotEmpty()) {
+                put("google_sheets", JSONObject().apply {
+                    put("spreadsheet_id", sheetId)
+                    put("service_account_json", serviceAccount)
+                })
+            }
         }
 
         val configFile = File(configDir, "config.json")
@@ -352,6 +384,53 @@ class SetupActivity : AppCompatActivity() {
         fun hasConfig(context: Context): Boolean {
             val configFile = File(context.filesDir, ".pocketclaw/config.json")
             return configFile.exists()
+        }
+    }
+
+    // Helper functions
+    private fun createLabel(text: String): TextView {
+        return TextView(this).apply {
+            this.text = text
+            textSize = 14f
+            setTextColor(Color.parseColor("#dddddd"))
+            setPadding(0, 8, 0, 8)
+        }
+    }
+
+    private fun createInput(hint: String, inputType: Int = InputType.TYPE_CLASS_TEXT): EditText {
+        return EditText(this).apply {
+            this.hint = hint
+            this.inputType = inputType
+            textSize = 14f
+            setTextColor(Color.WHITE)
+            setHintTextColor(Color.parseColor("#666666"))
+            setBackgroundColor(Color.parseColor("#16213e"))
+            setPadding(24, 24, 24, 24)
+        }
+    }
+
+    private fun createSpacer(): View {
+        return View(this).apply {
+            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 32)
+        }
+    }
+    
+    private fun createHint(text: String): TextView {
+        return TextView(this).apply {
+            this.text = text
+            textSize = 12f
+            setTextColor(Color.parseColor("#888888"))
+            setPadding(0, 4, 0, 16)
+        }
+    }
+
+    private fun createSectionHeader(title: String): TextView {
+        return TextView(this).apply {
+            text = title
+            textSize = 18f
+            setTextColor(Color.parseColor("#e94560"))
+            typeface = Typeface.DEFAULT_BOLD
+            setPadding(0, 32, 0, 16)
         }
     }
 }

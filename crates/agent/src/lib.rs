@@ -1,6 +1,7 @@
 pub mod agent_loop;
 pub mod session;
 pub mod context;
+pub mod sheets;
 pub fn add(left: u64, right: u64) -> u64 {
     left + right
 }
