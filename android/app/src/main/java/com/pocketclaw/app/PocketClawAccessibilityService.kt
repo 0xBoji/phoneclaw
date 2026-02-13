@@ -65,24 +65,74 @@ class PocketClawAccessibilityService : AccessibilityService() {
         return performGlobalAction(GLOBAL_ACTION_RECENTS)
     }
 
-    // Improved node finding and clicking
-    // This finds a node by text (case-insensitive) and clicks it
-    fun clickNodeByText(text: String): Boolean {
+    // --- Advanced Features ---
+
+    fun inputText(text: String): Boolean {
         val root = rootInActiveWindow ?: return false
-        val nodes = root.findAccessibilityNodeInfosByText(text)
-        for (node in nodes) {
-            // Check if the node is clickable, or find a clickable parent
-            var clickableNode = node
-            while (clickableNode != null) {
-                if (clickableNode.isClickable) {
-                    val result = clickableNode.performAction(AccessibilityNodeInfo.ACTION_CLICK)
-                    clickableNode.recycle()
-                    return result
-                }
-                clickableNode = clickableNode.parent
-            }
-            node.recycle()
+        val focus = root.findFocus(AccessibilityNodeInfo.FOCUS_INPUT)
+        
+        if (focus != null && focus.isEditable) {
+            val arguments = android.os.Bundle()
+            arguments.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, text)
+            val result = focus.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, arguments)
+            focus.recycle()
+            return result
         }
-        return false
+        
+        // Fallback: Try to find any editable node if focus is null
+        // This is a simple heuristic; might need refinement
+        return false 
+    }
+
+    fun dumpHierarchy(): String {
+        val root = rootInActiveWindow ?: return "<error>No active window root</error>"
+        val sb = StringBuilder()
+        dumpNode(root, sb, 0)
+        return sb.toString()
+    }
+
+    private fun dumpNode(node: AccessibilityNodeInfo?, sb: StringBuilder, depth: Int) {
+        if (node == null) return
+
+        val indent = "  ".repeat(depth)
+        sb.append(indent).append("<node")
+        
+        if (node.className != null) sb.append(" class=\"").append(node.className).append("\"")
+        if (node.text != null) sb.append(" text=\"").append(escapeXml(node.text)).append("\"")
+        if (node.contentDescription != null) sb.append(" desc=\"").append(escapeXml(node.contentDescription)).append("\"")
+        if (node.viewIdResourceName != null) sb.append(" id=\"").append(node.viewIdResourceName).append("\"")
+        
+        val rect = android.graphics.Rect()
+        node.getBoundsInScreen(rect)
+        sb.append(" bounds=\"").append(rect.toShortString()).append("\"")
+        
+        if (node.isClickable) sb.append(" clickable=\"true\"")
+        if (node.isEditable) sb.append(" editable=\"true\"")
+        if (node.isVisibleToUser) sb.append(" visible=\"true\"")
+
+        if (node.childCount == 0) {
+            sb.append(" />\n")
+        } else {
+            sb.append(">\n")
+            for (i in 0 until node.childCount) {
+                dumpNode(node.getChild(i), sb, depth + 1)
+            }
+            sb.append(indent).append("</node>\n")
+        }
+        
+        // node.recycle() - careful with recycling here if used recursively with getChild(), 
+        // usually safer to let system handle it or recycle carefully in non-recursive loop.
+        // For simple recursion, getting usage from getChild creates new instances.
+    }
+
+    private fun escapeXml(original: CharSequence?): String {
+        if (original == null) return ""
+        return original.toString()
+            .replace("&", "&amp;")
+            .replace("<", "&lt;")
+            .replace(">", "&gt;")
+            .replace("\"", "&quot;")
+            .replace("'", "&apos;")
+            .replace("\n", "&#10;")
     }
 }

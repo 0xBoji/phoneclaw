@@ -29,4 +29,14 @@ object RustBridge {
     fun performScroll(x1: Float, y1: Float, x2: Float, y2: Float): Boolean {
         return PocketClawAccessibilityService.instance?.swipe(x1, y1, x2, y2) ?: false
     }
+
+    @JvmStatic
+    fun performInputText(text: String): Boolean {
+        return PocketClawAccessibilityService.instance?.inputText(text) ?: false
+    }
+
+    @JvmStatic
+    fun performDumpHierarchy(): String {
+        return PocketClawAccessibilityService.instance?.dumpHierarchy() ?: "<error>Service not connected</error>"
+    }
 }

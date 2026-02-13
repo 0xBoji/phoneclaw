@@ -46,6 +46,26 @@ impl AndroidBridge for AndroidBridgeImpl {
     async fn home(&self) -> Result<bool, String> {
         self.call_bool_method("performHome", "()Z", &[])
     }
+
+    async fn input_text(&self, text: String) -> Result<bool, String> {
+        let mut env = self.vm.attach_current_thread_permanently().map_err(|e| e.to_string())?;
+        let jtext = env.new_string(text).map_err(|e| e.to_string())?;
+        let result = env
+            .call_static_method(&self.bridge_class, "performInputText", "(Ljava/lang/String;)Z", &[(&jtext).into()])
+            .map_err(|e| e.to_string())?;
+        result.z().map_err(|e| e.to_string())
+    }
+
+    async fn dump_hierarchy(&self) -> Result<String, String> {
+        let mut env = self.vm.attach_current_thread_permanently().map_err(|e| e.to_string())?;
+        let result = env
+            .call_static_method(&self.bridge_class, "performDumpHierarchy", "()Ljava/lang/String;", &[])
+            .map_err(|e| e.to_string())?;
+        let jstr = result.l().map_err(|e| e.to_string())?;
+        let jstring: JString = jstr.into();
+        let rust_str: String = env.get_string(&jstring).map_err(|e| e.to_string())?.into();
+        Ok(rust_str)
+    }
 }
 
 #[no_mangle]
