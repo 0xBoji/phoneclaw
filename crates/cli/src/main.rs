@@ -472,6 +472,17 @@ async fn main() -> anyhow::Result<()> {
         .await;
     tools.register(Arc::new(DatetimeNowTool::new())).await;
 
+    // Start Cron Service in background
+    let cron_store_path = get_cron_store_path();
+    if let Some(parent) = cron_store_path.parent() {
+        let _ = tokio::fs::create_dir_all(parent).await;
+    }
+    let cron_service = Arc::new(CronService::new(cron_store_path));
+    let _cron_loop_handle = cron_service.clone().start_loop(bus.clone());
+    info!("Cron service initialized and loop started");
+
+    tools.register(Arc::new(pocketclaw_tools::cron_tools::CronTool::new(cron_service.clone()))).await;
+
     let agent = AgentLoop::new(
         bus.clone(),
         config.clone(),
@@ -536,11 +547,6 @@ async fn main() -> anyhow::Result<()> {
             let heartbeat = HeartbeatService::new(workspace.clone(), 30 * 60, true);
             heartbeat.start(bus.clone());
             info!("Heartbeat service started");
-
-            // Start Cron Service in background
-            let cron_store = get_cron_store_path();
-            let _cron_service = CronService::new(cron_store);
-            info!("Cron service initialized");
 
             // Voice transcription
             if let Some(groq_cfg) = &config_val.providers.groq {

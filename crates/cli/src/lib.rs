@@ -327,6 +327,21 @@ pub async fn start_server(config_path: Option<PathBuf>) -> anyhow::Result<()> {
         .await;
     tools.register(Arc::new(DatetimeNowTool::new())).await;
 
+    // Start Cron Service in background
+    let cron_store_path = config_path_saved
+        .as_ref()
+        .and_then(|p| p.parent())
+        .map(|dir| dir.join("cron/jobs.json"))
+        .unwrap_or_else(|| workspace.join(".pocketclaw/cron/jobs.json"));
+    if let Some(parent) = cron_store_path.parent() {
+        let _ = tokio::fs::create_dir_all(parent).await;
+    }
+    let cron_service = Arc::new(CronService::new(cron_store_path));
+    let _cron_loop_handle = cron_service.clone().start_loop(bus.clone());
+    info!("Cron service initialized and loop started");
+
+    tools.register(Arc::new(pocketclaw_tools::cron_tools::CronTool::new(cron_service.clone()))).await;
+
     let agent = AgentLoop::new(
         bus.clone(),
         config.clone(),
@@ -389,20 +404,6 @@ pub async fn start_server(config_path: Option<PathBuf>) -> anyhow::Result<()> {
     let heartbeat = HeartbeatService::new(workspace.clone(), 30 * 60, true);
     heartbeat.start(bus.clone());
     info!("Heartbeat service started");
-
-    // Start Cron Service in background
-    // Derive cron store path from config path or fall back to workspace
-    let cron_store = config_path_saved
-        .as_ref()
-        .and_then(|p| p.parent())
-        .map(|dir| dir.join("cron/jobs.json"))
-        .unwrap_or_else(|| workspace.join(".pocketclaw/cron/jobs.json"));
-    // Ensure cron directory exists
-    if let Some(parent) = cron_store.parent() {
-        let _ = tokio::fs::create_dir_all(parent).await;
-    }
-    let _cron_service = CronService::new(cron_store);
-    info!("Cron service initialized");
 
     // Voice transcription
     if let Some(groq_cfg) = &config_val.providers.groq {
