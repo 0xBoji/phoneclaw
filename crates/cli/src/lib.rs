@@ -225,7 +225,9 @@ fn runtime_gateway_config(config: &AppConfig) -> GatewayRuntimeConfig {
 
 
 
-pub async fn start_server(config_path: Option<PathBuf>) -> anyhow::Result<()> {
+use pocketclaw_tools::android_tools::{AndroidBridge, AndroidActionTool};
+
+pub async fn start_server(config_path: Option<PathBuf>, android_bridge: Option<Arc<dyn AndroidBridge>>) -> anyhow::Result<()> {
     // Save config path before it's consumed
     let config_path_saved = config_path.clone();
 
@@ -274,6 +276,11 @@ pub async fn start_server(config_path: Option<PathBuf>) -> anyhow::Result<()> {
                 .register(tool)
                 .await;
         }
+    }
+
+    if let Some(bridge) = android_bridge {
+        tools.register(Arc::new(AndroidActionTool::new(bridge))).await;
+        info!("Android Action Tool registered");
     }
 
     let context_builder = ContextBuilder::new(workspace.clone());
