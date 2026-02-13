@@ -97,18 +97,46 @@ class SkillsPermissionsActivity : AppCompatActivity() {
         skillsDir.listFiles()?.forEach { dir ->
             if (!dir.isDirectory) return@forEach
             val toml = File(dir, "skill.toml")
-            if (!toml.exists()) return@forEach
+            val skillMd = File(dir, "SKILL.md")
+            if (!toml.exists() && !skillMd.exists()) return@forEach
 
-            val text = toml.readText()
-            val name = Regex("name\\s*=\\s*\"([^\"]+)\"").find(text)?.groupValues?.get(1) ?: dir.name
-            val toolsBlock = Regex("tools\\s*=\\s*\\[([^\\]]+)\\]", RegexOption.DOT_MATCHES_ALL)
-                .find(text)
+            if (toml.exists()) {
+                val text = toml.readText()
+                val name = Regex("name\\s*=\\s*\"([^\"]+)\"").find(text)?.groupValues?.get(1) ?: dir.name
+                val toolsBlock = Regex("tools\\s*=\\s*\\[([^\\]]+)\\]", RegexOption.DOT_MATCHES_ALL)
+                    .find(text)
+                    ?.groupValues
+                    ?.get(1)
+                    .orEmpty()
+                val tools = Regex("\"([^\"]+)\"").findAll(toolsBlock).map { it.groupValues[1] }.toList()
+                found.add(SkillView(name = name, path = toml.absolutePath, tools = tools))
+                return@forEach
+            }
+
+            val legacyText = skillMd.readText()
+            val legacyName = Regex("(?m)^name:\\s*([A-Za-z0-9_\\-]+)\\s*$")
+                .find(legacyText)
                 ?.groupValues
                 ?.get(1)
-                .orEmpty()
-            val tools = Regex("\"([^\"]+)\"").findAll(toolsBlock).map { it.groupValues[1] }.toList()
-
-            found.add(SkillView(name = name, path = toml.absolutePath, tools = tools))
+                ?: dir.name
+            val knownTools = listOf(
+                "android_screen",
+                "android_action",
+                "web_fetch",
+                "web_search",
+                "exec_cmd",
+                "read_file",
+                "write_file",
+                "list_dir",
+                "sessions_list",
+                "sessions_history",
+                "sessions_send",
+                "channel_health",
+                "metrics_snapshot",
+                "datetime_now"
+            )
+            val legacyTools = knownTools.filter { legacyText.contains("`$it`") }
+            found.add(SkillView(name = legacyName, path = skillMd.absolutePath, tools = legacyTools))
         }
         return found.sortedBy { it.name.lowercase() }
     }
