@@ -71,13 +71,13 @@ jobs:
     - name: Rename APK
       run: |
         mkdir -p release
-        cp android/app/build/outputs/apk/debug/*.apk release/PocketClaw-debug.apk
+        cp android/app/build/outputs/apk/debug/*.apk release/PhoneClaw-dev.apk
 
     - name: Upload APK as artifact
       uses: actions/upload-artifact@v4
       with:
-        name: PocketClaw-debug
-        path: release/PocketClaw-debug.apk
+        name: PhoneClaw-dev
+        path: release/PhoneClaw-dev.apk
 
     # Auto-create a rolling "latest" release with the APK
     - name: Create/Update Release
@@ -85,19 +85,19 @@ jobs:
       uses: softprops/action-gh-release@v2
       with:
         tag_name: latest
-        name: "PocketClaw Latest Build"
+        name: "PhoneClaw Latest Build"
         body: |
-          🦞 **PocketClaw Android APK** - Auto-built from `main` branch.
+          🦞 **PhoneClaw Android APK** - Auto-built from `main` branch.
           
           **How to install:**
-          1. Download `PocketClaw-debug.apk` below
+          1. Download `PhoneClaw-dev.apk` below
           2. Transfer to your Android phone
           3. Enable "Install from unknown sources" in Settings
           4. Open the APK and install
           
           Built at: ${{ github.event.head_commit.timestamp }}
           Commit: ${{ github.sha }}
-        files: release/PocketClaw-debug.apk
+        files: release/PhoneClaw-dev.apk
         prerelease: true
         make_latest: true
       env:
