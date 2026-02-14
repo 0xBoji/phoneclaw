@@ -17,7 +17,9 @@ class ProviderSecretsActivity : AppCompatActivity() {
         val store = AppConfigStore(this)
         val config = store.load()
 
-        val providers = arrayOf("openai", "google", "anthropic", "openrouter", "groq")
+        val providers = ModelCatalog.providers
+        val providerModels = ModelCatalog.providerModels
+        var selectedModel = config.model
         val (scroll, root) = UiFactory.screen(this)
 
         root.addView(UiFactory.title(this, "Screen 2: Provider & Secrets"))
@@ -37,9 +39,10 @@ class ProviderSecretsActivity : AppCompatActivity() {
         root.addView(apiKeyInput)
 
         root.addView(UiFactory.label(this, "Model (required)"))
-        val modelInput = UiFactory.input(this, "gpt-4o-mini")
-        modelInput.setText(config.model)
-        root.addView(modelInput)
+        val modelOptions = mutableListOf<String>()
+        val modelAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, modelOptions)
+        val modelSpinner = Spinner(this).apply { adapter = modelAdapter }
+        root.addView(modelSpinner)
 
         root.addView(UiFactory.label(this, "System Prompt"))
         val promptInput = UiFactory.input(this, "You are a helpful AI assistant.", multiline = true)
@@ -110,7 +113,7 @@ class ProviderSecretsActivity : AppCompatActivity() {
         val saveBtn = UiFactory.actionButton(this, "Save Provider Settings")
         saveBtn.setOnClickListener {
             val key = apiKeyInput.text.toString().trim()
-            val model = modelInput.text.toString().trim()
+            val model = selectedModel.trim()
             if (key.isBlank() || model.isBlank()) {
                 Toast.makeText(this, "API key va model la bat buoc", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
@@ -134,6 +137,40 @@ class ProviderSecretsActivity : AppCompatActivity() {
             finish()
         }
         root.addView(saveBtn)
+
+        fun refreshModels(provider: String) {
+            val list = providerModels[provider].orEmpty().toMutableList()
+            if (selectedModel.isNotBlank() && selectedModel !in list) {
+                list.add(0, selectedModel)
+            }
+            if (list.isEmpty()) {
+                list.add("gpt-4o-mini")
+            }
+            modelOptions.clear()
+            modelOptions.addAll(list)
+            modelAdapter.notifyDataSetChanged()
+            val index = modelOptions.indexOf(selectedModel).let { if (it >= 0) it else 0 }
+            modelSpinner.setSelection(index)
+            selectedModel = modelOptions[index]
+        }
+
+        providerSpinner.setOnItemSelectedListener(object : android.widget.AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: android.widget.AdapterView<*>?, view: android.view.View?, position: Int, id: Long) {
+                refreshModels(providers[position])
+            }
+            override fun onNothingSelected(parent: android.widget.AdapterView<*>?) {}
+        })
+
+        modelSpinner.setOnItemSelectedListener(object : android.widget.AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: android.widget.AdapterView<*>?, view: android.view.View?, position: Int, id: Long) {
+                if (position in modelOptions.indices) {
+                    selectedModel = modelOptions[position]
+                }
+            }
+            override fun onNothingSelected(parent: android.widget.AdapterView<*>?) {}
+        })
+
+        refreshModels(config.provider)
 
         setContentView(scroll)
     }

@@ -14,19 +14,14 @@ import androidx.appcompat.app.AppCompatActivity
 import com.pocketclaw.app.wave.AppConfigData
 import com.pocketclaw.app.wave.AppConfigStore
 import com.pocketclaw.app.wave.ControllerDashboardActivity
+import com.pocketclaw.app.wave.ModelCatalog
 import com.pocketclaw.app.wave.UiFactory
 
 class SetupWizardActivity : AppCompatActivity() {
     private enum class Mode { QUICKSTART, MANUAL }
 
-    private val providers = arrayOf("openai", "google", "anthropic", "openrouter", "groq")
-    private val providerModels = mapOf(
-        "openai" to listOf("gpt-4o-mini", "gpt-4.1-mini", "gpt-4.1", "gpt-4o"),
-        "google" to listOf("gemini-2.0-flash", "gemini-1.5-pro"),
-        "anthropic" to listOf("claude-3-5-sonnet-latest", "claude-3-7-sonnet-latest"),
-        "openrouter" to listOf("openai/gpt-4o-mini", "anthropic/claude-3.5-sonnet", "google/gemini-2.0-flash"),
-        "groq" to listOf("llama-3.3-70b-versatile", "llama-3.1-8b-instant", "mixtral-8x7b-32768"),
-    )
+    private val providers = ModelCatalog.providers
+    private val providerModels = ModelCatalog.providerModels
     private val channels = arrayOf("telegram", "discord", "slack", "whatsapp")
     private val channelLabels = mapOf(
         "telegram" to "Telegram",
