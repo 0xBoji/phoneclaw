@@ -24,13 +24,11 @@ use phoneclaw_whatsapp::WhatsAppAdapter;
 use phoneclaw_zalo::ZaloAdapter;
 use phoneclaw_googlechat::GoogleChatAdapter;
 use phoneclaw_tools::sandbox::SandboxConfig;
-use phoneclaw_tools::exec_tool::ExecTool;
-use phoneclaw_tools::fs_tools::{ListDirTool, ReadFileTool, WriteFileTool};
 use phoneclaw_tools::registry::ToolRegistry;
 use phoneclaw_tools::platform_tools::{ChannelHealthTool, DatetimeNowTool, MetricsSnapshotTool};
-use phoneclaw_tools::sessions_tools::{SessionsHistoryTool, SessionsListTool, SessionsSendTool};
-use phoneclaw_tools::web_fetch::WebFetchTool;
+use phoneclaw_tools::sessions_tools::{SessionsHistoryTool, SessionsListTool};
 use phoneclaw_tools::web_search::WebSearchTool;
+use phoneclaw_tools::android_tools::AndroidBridge;
 use phoneclaw_core::metrics::MetricsStore;
 use std::path::PathBuf;
 use std::sync::Arc;
@@ -222,11 +220,6 @@ fn runtime_gateway_config(config: &AppConfig) -> GatewayRuntimeConfig {
             .clamp(128, 20_000),
     }
 }
-
-
-
-use phoneclaw_tools::android_tools::{AndroidBridge, AndroidActionTool, AndroidScreenTool};
-
 pub async fn start_server(config_path: Option<PathBuf>, android_bridge: Option<Arc<dyn AndroidBridge>>) -> anyhow::Result<()> {
     // Save config path before it's consumed
     let config_path_saved = config_path.clone();
@@ -263,12 +256,6 @@ pub async fn start_server(config_path: Option<PathBuf>, android_bridge: Option<A
     let provider: Arc<dyn LLMProvider> = create_provider(&config_val)?;
 
     let tools = ToolRegistry::new();
-    tools.register(Arc::new(ExecTool::new(sandbox.clone()))).await;
-    tools.register(Arc::new(ReadFileTool::new(sandbox.clone()))).await;
-    tools.register(Arc::new(WriteFileTool::new(sandbox.clone()))).await;
-    tools.register(Arc::new(ListDirTool::new(sandbox.clone()))).await;
-    tools.register(Arc::new(WebFetchTool::new(sandbox.clone()))).await;
-
     if let Some(web_cfg) = &config_val.web {
         if let Some(brave_key) = &web_cfg.brave_key {
             let tool: Arc<dyn phoneclaw_tools::Tool> = Arc::new(WebSearchTool::new(brave_key.clone(), sandbox.clone()));
@@ -278,10 +265,8 @@ pub async fn start_server(config_path: Option<PathBuf>, android_bridge: Option<A
         }
     }
 
-    if let Some(bridge) = android_bridge {
-        tools.register(Arc::new(AndroidActionTool::new(bridge.clone()))).await;
-        tools.register(Arc::new(AndroidScreenTool::new(bridge.clone()))).await;
-        info!("Android Action & Screen Tools registered");
+    if android_bridge.is_some() {
+        info!("Android bridge connected, but high-privilege Android control tools are disabled");
     }
 
     let context_builder = ContextBuilder::new(workspace.clone());
@@ -317,9 +302,6 @@ pub async fn start_server(config_path: Option<PathBuf>, android_bridge: Option<A
         .await;
     tools
         .register(Arc::new(SessionsHistoryTool::new(session_store.clone())))
-        .await;
-    tools
-        .register(Arc::new(SessionsSendTool::new(bus.clone())))
         .await;
     tools
         .register(Arc::new(ChannelHealthTool::new(

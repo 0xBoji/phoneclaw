@@ -122,17 +122,9 @@ class SkillsPermissionsActivity : AppCompatActivity() {
                 ?.get(1)
                 ?: dir.name
             val knownTools = listOf(
-                "android_screen",
-                "android_action",
-                "web_fetch",
                 "web_search",
-                "exec_cmd",
-                "read_file",
-                "write_file",
-                "list_dir",
                 "sessions_list",
                 "sessions_history",
-                "sessions_send",
                 "channel_health",
                 "metrics_snapshot",
                 "datetime_now"

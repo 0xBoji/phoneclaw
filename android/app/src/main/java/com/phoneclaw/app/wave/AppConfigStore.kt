@@ -44,25 +44,6 @@ class AppConfigStore(private val context: Context) {
     companion object {
         private const val PERSONA_BLOCK_START = "<!-- phoneclaw:persona:start -->"
         private const val PERSONA_BLOCK_END = "<!-- phoneclaw:persona:end -->"
-        private const val DEFAULT_ANDROID_NAV_SKILL = """
----
-name: android_nav
-description: Interact with Android UI via accessibility tools.
----
-
-# Android Navigation
-
-Use the tools below when user asks to open apps or navigate UI:
-- `android_screen`
-- `android_action`
-
-Workflow:
-1. `android_action` with `home`.
-2. `android_screen` with `dump_hierarchy`.
-3. Find target app/button by text/content-desc.
-4. `android_action` with `click` on matched bounds.
-5. Repeat dump/click for next step.
-"""
     }
 
     private val configDir: File = File(context.filesDir, ".phoneclaw")
@@ -330,13 +311,10 @@ Workflow:
 
         val skillsDir = File(workspace, "skills")
         if (!skillsDir.exists()) skillsDir.mkdirs()
-
+        // Remove legacy high-privilege Android navigation skill scaffold.
         val androidNavDir = File(skillsDir, "android_nav")
-        if (!androidNavDir.exists()) androidNavDir.mkdirs()
-
-        val skillFile = File(androidNavDir, "SKILL.md")
-        if (!skillFile.exists() || skillFile.readText().isBlank()) {
-            skillFile.writeText(DEFAULT_ANDROID_NAV_SKILL.trim() + "\n")
+        if (androidNavDir.exists() && androidNavDir.isDirectory) {
+            androidNavDir.deleteRecursively()
         }
     }
 

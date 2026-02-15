@@ -16,10 +16,7 @@ pub struct ContextBuilder {
 
 impl ContextBuilder {
     const ALLOW_ALL_MARKER: &'static str = "*";
-    const SAFE_DEFAULT_TOOLS: [&'static str; 8] = [
-        "read_file",
-        "list_dir",
-        "web_fetch",
+    const SAFE_DEFAULT_TOOLS: [&'static str; 5] = [
         "web_search",
         "sessions_list",
         "sessions_history",
@@ -140,7 +137,6 @@ impl ContextBuilder {
         prompt.push_str("You must answer the user's request accurately and concisely.\n");
         prompt.push_str("If you need to perform actions, use the provided tools.\n");
         prompt.push_str("When user asks to search the web/news/latest info, prefer `web_search` first.\n");
-        prompt.push_str("Use `web_fetch` only for fetching a concrete URL, not for search-engine query URLs.\n");
 
         // Load workspace context files if they exist
         let context_files = ["AGENTS.md", "SOUL.md", "USER.md", "TOOLS.md", "IDENTITY.md"];
