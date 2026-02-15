@@ -1,8 +1,39 @@
-# phoneclaw-rs (Android-First Local Gateway)
+# PhoneClaw (Android-First Local Gateway)
 
 `phoneclaw-rs` is a local-first AI agent runtime focused on Android devices, especially old phones used as always-on local gateway nodes.
 
 Primary goal: user only needs to set `provider + api key + model`, then start the gateway.
+
+## Highlights
+
+- Android-first setup flow (Wizard + dashboard control)
+- Multi-channel gateway (Telegram/Discord/Slack/WhatsApp/Teams/Zalo/Google Chat)
+- Security-hardened defaults for mobile deployment
+- Rust release profile optimized for compact binaries
+
+## Performance Snapshot (Measured)
+
+Measured on the same machine (`Darwin arm64`, 2026-02-15) with release builds:
+
+| Metric | PhoneClaw | PicoClaw |
+| --- | ---: | ---: |
+| Binary size (CLI release) | **~14 MB** | ~16 MB |
+| CLI startup (`status`, warm) | **0.00-0.03s** | 0.00-0.01s |
+| Gateway idle RSS (~4s) | ~21.2 MB | **~16.8 MB** |
+
+Notes:
+- PhoneClaw run included gateway subsystems (cron/heartbeat/metrics) enabled.
+- PicoClaw values shown for same host and method, to give practical baseline.
+
+## Feature Matrix
+
+| Category | PhoneClaw | PicoClaw |
+| --- | --- | --- |
+| Runtime | Rust + Tokio/Axum | Go |
+| Android native app UI | Yes | No |
+| Channels | Telegram, Discord, Slack, WhatsApp, Teams, Zalo, Google Chat | Telegram, Discord, Slack, WhatsApp, QQ, DingTalk, Feishu, MaixCam |
+| Provider config surface | OpenAI, OpenRouter, Anthropic, Google, Groq | Anthropic, OpenAI, OpenRouter, Groq, Zhipu, VLLM, Gemini, Nvidia, Moonshot |
+| Default tool posture | Security-hardened (reduced high-privilege tools) | Power-user tooling (shell/fs/edit/spawn/web/cron) |
 
 ## Supported Usage Modes (Android only)
 
