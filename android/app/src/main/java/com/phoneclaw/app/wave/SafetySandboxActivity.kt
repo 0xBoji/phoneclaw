@@ -34,7 +34,7 @@ class SafetySandboxActivity : AppCompatActivity() {
 
         val execToggle = CheckBox(this).apply {
             text = "Enable exec_cmd"
-            setTextColor(0xFFD1D5DB.toInt())
+            setTextColor(UiFactory.colorTextPrimary())
             isChecked = config.sandboxExecEnabled
         }
         root.addView(execToggle)
@@ -59,7 +59,7 @@ class SafetySandboxActivity : AppCompatActivity() {
         root.addView(UiFactory.section(this, "Performance (Android old devices)"))
         val liteToggle = CheckBox(this).apply {
             text = "Lite mode (recommended for old Android)"
-            setTextColor(0xFFD1D5DB.toInt())
+            setTextColor(UiFactory.colorTextPrimary())
             isChecked = config.liteMode
         }
         root.addView(liteToggle)

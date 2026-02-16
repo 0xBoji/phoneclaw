@@ -35,13 +35,13 @@ class SkillsPermissionsActivity : AppCompatActivity() {
                 val card = LinearLayout(this).apply {
                     orientation = LinearLayout.VERTICAL
                     setPadding(18, 18, 18, 18)
-                    setBackgroundColor(0xFF1B2330.toInt())
+                    background = UiFactory.surfaceCard(this@SkillsPermissionsActivity).background
                 }
 
                 val title = TextView(this).apply {
                     text = "${skill.name} (${skill.path})"
                     textSize = 14f
-                    setTextColor(0xFFD1D5DB.toInt())
+                    setTextColor(UiFactory.colorTextPrimary())
                 }
                 card.addView(title)
 
@@ -51,7 +51,7 @@ class SkillsPermissionsActivity : AppCompatActivity() {
 
                 val sw = Switch(this).apply {
                     text = "Approved"
-                    setTextColor(0xFF9AA3B2.toInt())
+                    setTextColor(UiFactory.colorTextSecondary())
                     isChecked = approved.contains(skill.name)
                 }
                 card.addView(sw)

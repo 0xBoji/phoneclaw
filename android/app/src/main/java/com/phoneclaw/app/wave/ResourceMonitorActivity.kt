@@ -26,7 +26,7 @@ class ResourceMonitorActivity : AppCompatActivity() {
         val eventsScroll = ScrollView(this)
         val eventsView = TextView(this).apply {
             textSize = 11f
-            setTextColor(0xFF93C5FD.toInt())
+            setTextColor(UiFactory.colorPrimaryDark())
             typeface = android.graphics.Typeface.MONOSPACE
             text = "Event stream stopped\n"
         }
@@ -52,15 +52,32 @@ class ResourceMonitorActivity : AppCompatActivity() {
             )
             appendLine(eventsView, eventsScroll, "connecting ws://127.0.0.1:8080/ws/events")
         }
-        root.addView(startEventsBtn)
-
-        val stopEventsBtn = UiFactory.secondaryButton(this, "Stop Event Stream")
+        val stopEventsBtn = UiFactory.actionButton(this, "Stop Event Stream")
         stopEventsBtn.setOnClickListener {
             eventSocket?.close(1000, "user stop")
             eventSocket = null
             appendLine(eventsView, eventsScroll, "event stream stopped")
         }
-        root.addView(stopEventsBtn)
+        val streamNav = android.widget.LinearLayout(this).apply {
+            orientation = android.widget.LinearLayout.HORIZONTAL
+            gravity = android.view.Gravity.CENTER
+        }
+        startEventsBtn.layoutParams = android.widget.LinearLayout.LayoutParams(
+            0,
+            android.widget.LinearLayout.LayoutParams.WRAP_CONTENT,
+            1f
+        )
+        stopEventsBtn.layoutParams = android.widget.LinearLayout.LayoutParams(
+            0,
+            android.widget.LinearLayout.LayoutParams.WRAP_CONTENT,
+            1f
+        )
+        streamNav.addView(startEventsBtn)
+        streamNav.addView(UiFactory.spacer(this, 0).apply {
+            layoutParams = android.widget.LinearLayout.LayoutParams(10, 1)
+        })
+        streamNav.addView(stopEventsBtn)
+        root.addView(streamNav)
 
         setContentView(scroll)
     }

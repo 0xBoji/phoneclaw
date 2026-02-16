@@ -57,7 +57,7 @@ class SessionLiveActivity : AppCompatActivity() {
         messagesScroll = ScrollView(this)
         messagesText = TextView(this).apply {
             textSize = 12f
-            setTextColor(0xFFE5E7EB.toInt())
+            setTextColor(UiFactory.colorTextPrimary())
             typeface = Typeface.MONOSPACE
             text = "No session selected\n"
         }
@@ -152,7 +152,7 @@ class SessionLiveActivity : AppCompatActivity() {
             val row = TextView(this).apply {
                 text = "$key  •  msgs: $count  •  $updated"
                 textSize = 13f
-                setTextColor(0xFF93C5FD.toInt())
+                setTextColor(UiFactory.colorPrimaryDark())
                 setPadding(0, 8, 0, 8)
                 setOnClickListener {
                     selectedSessionKey = key

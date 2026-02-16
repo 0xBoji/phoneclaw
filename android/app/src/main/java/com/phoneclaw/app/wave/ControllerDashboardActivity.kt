@@ -3,13 +3,12 @@ package com.phoneclaw.app.wave
 import android.content.Intent
 import android.os.Bundle
 import android.widget.LinearLayout
-import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.phoneclaw.app.PhoneClawService
 
 class ControllerDashboardActivity : AppCompatActivity() {
-    private lateinit var statusText: TextView
+    private lateinit var statusText: android.widget.TextView
     private lateinit var store: AppConfigStore
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -67,20 +66,17 @@ class ControllerDashboardActivity : AppCompatActivity() {
 
         val navLayout = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         navLayout.addView(navButton("Screen 2: Provider & Secrets", ProviderSecretsActivity::class.java))
-        navLayout.addView(navButton("Screen 3: Channels", ChannelChatSetupActivity::class.java))
+        navLayout.addView(UiFactory.spacer(this, 8))
         navLayout.addView(navButton("Screen 4: Skills", SkillsPermissionsActivity::class.java))
+        navLayout.addView(UiFactory.spacer(this, 8))
         navLayout.addView(navButton("Screen 6: Monitor", ResourceMonitorActivity::class.java))
         root.addView(navLayout)
 
         setContentView(scroll)
     }
 
-    private fun navButton(text: String, target: Class<*>): TextView {
-        return TextView(this).apply {
-            this.text = text
-            textSize = 14f
-            setTextColor(0xFF93C5FD.toInt())
-            setPadding(0, 10, 0, 10)
+    private fun navButton(text: String, target: Class<*>): android.widget.Button {
+        return UiFactory.secondaryButton(this, text).apply {
             setOnClickListener { startActivity(Intent(this@ControllerDashboardActivity, target)) }
         }
     }

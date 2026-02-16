@@ -2,6 +2,7 @@ package com.phoneclaw.app
 
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Button
 import android.view.Gravity
 import android.widget.ArrayAdapter
 import android.widget.FrameLayout
@@ -43,6 +44,8 @@ class SetupWizardActivity : AppCompatActivity() {
     private val channelKeyDrafts = mutableMapOf<String, String>()
 
     private lateinit var contentRoot: LinearLayout
+    private lateinit var backBtn: Button
+    private lateinit var nextBtn: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -75,23 +78,41 @@ class SetupWizardActivity : AppCompatActivity() {
 
         val frame = FrameLayout(this)
         val (scroll, root) = UiFactory.screen(this)
+        scroll.setPadding(12, 12, 12, 120)
         contentRoot = root
-        frame.addView(scroll)
 
-        val settingsBtn = UiFactory.secondaryButton(this, "Settings")
-        val settingsLp = FrameLayout.LayoutParams(
+        val footer = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER
+            setPadding(12, 8, 12, 12)
+        }
+
+        backBtn = UiFactory.secondaryButton(this, "Back").apply {
+            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+            setOnClickListener {
+                if (step > 0) {
+                    step -= 1
+                    renderStep()
+                }
+            }
+        }
+        nextBtn = UiFactory.actionButton(this, "Next").apply {
+            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+            setOnClickListener { onNext() }
+        }
+
+        footer.addView(backBtn)
+        footer.addView(UiFactory.spacer(this, 0).apply {
+            layoutParams = LinearLayout.LayoutParams(10, 1)
+        })
+        footer.addView(nextBtn)
+
+        frame.addView(scroll)
+        frame.addView(footer, FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.MATCH_PARENT,
             FrameLayout.LayoutParams.WRAP_CONTENT,
-            FrameLayout.LayoutParams.WRAP_CONTENT
-        ).apply {
-            gravity = Gravity.END or Gravity.BOTTOM
-            marginEnd = 28
-            bottomMargin = 28
-        }
-        settingsBtn.layoutParams = settingsLp
-        settingsBtn.setOnClickListener {
-            startActivity(Intent(this, SetupActivity::class.java))
-        }
-        frame.addView(settingsBtn)
+            Gravity.BOTTOM
+        ))
 
         setContentView(frame)
         renderStep()
@@ -99,8 +120,29 @@ class SetupWizardActivity : AppCompatActivity() {
 
     private fun renderStep() {
         contentRoot.removeAllViews()
+        val topBar = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+        }
+
+        val progressChip = UiFactory.chipButton(this, "Step ${step + 1}/6").apply {
+            isEnabled = false
+            alpha = 1f
+        }
+        val settingsBtn = UiFactory.chipButton(this, "Advanced")
+        settingsBtn.setOnClickListener { startActivity(Intent(this, SetupActivity::class.java)) }
+
+        val progressLp = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+        progressChip.layoutParams = progressLp
+        topBar.addView(progressChip)
+        topBar.addView(UiFactory.spacer(this, 0).apply {
+            layoutParams = LinearLayout.LayoutParams(10, 1)
+        })
+        topBar.addView(settingsBtn)
+        contentRoot.addView(topBar)
+
         contentRoot.addView(UiFactory.title(this, "PhoneClaw Setup Wizard"))
-        contentRoot.addView(UiFactory.subtitle(this, "Step ${step + 1}/6"))
+        contentRoot.addView(UiFactory.subtitle(this, "Quick setup for provider, model, and channel key."))
         contentRoot.addView(UiFactory.hint(this, progressDots(step, 6)))
 
         when (step) {
@@ -112,8 +154,7 @@ class SetupWizardActivity : AppCompatActivity() {
             5 -> renderChannelKeyStep()
         }
 
-        contentRoot.addView(UiFactory.spacer(this, 20))
-        renderNav()
+        updateNavButtons()
     }
 
     private fun renderModeStep() {
@@ -128,13 +169,13 @@ class SetupWizardActivity : AppCompatActivity() {
                 id = quickId
                 text = "Quickstart"
                 textSize = 15f
-                setTextColor(0xFFE5E7EB.toInt())
+                setTextColor(UiFactory.colorTextPrimary())
             })
             addView(RadioButton(this@SetupWizardActivity).apply {
                 id = manualId
                 text = "Manual"
                 textSize = 15f
-                setTextColor(0xFFE5E7EB.toInt())
+                setTextColor(UiFactory.colorTextPrimary())
             })
             check(if (mode == Mode.QUICKSTART) quickId else manualId)
             setOnCheckedChangeListener { _, checkedId ->
@@ -241,30 +282,10 @@ class SetupWizardActivity : AppCompatActivity() {
         contentRoot.addView(UiFactory.hint(this, "After setup, you can teach naming style directly in chat."))
     }
 
-    private fun renderNav() {
-        val nav = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-            gravity = Gravity.CENTER
-        }
-
-        val backBtn = UiFactory.secondaryButton(this, "Back")
+    private fun updateNavButtons() {
         backBtn.isEnabled = step > 0
-        backBtn.alpha = if (step > 0) 1f else 0.4f
-        backBtn.setOnClickListener {
-            if (step > 0) {
-                step -= 1
-                renderStep()
-            }
-        }
-        nav.addView(backBtn)
-
-        val nextBtn = UiFactory.actionButton(this, if (step == 5) "Done" else "Next")
-        nextBtn.setOnClickListener {
-            onNext()
-        }
-        nav.addView(nextBtn)
-
-        contentRoot.addView(nav)
+        backBtn.alpha = if (step > 0) 1f else 0.45f
+        nextBtn.text = if (step == 5) "Done" else "Next"
     }
 
     private fun onNext() {

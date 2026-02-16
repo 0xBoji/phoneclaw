@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
 import com.phoneclaw.app.wave.AppConfigStore
-import com.phoneclaw.app.wave.ChannelChatSetupActivity
 import com.phoneclaw.app.wave.ControllerDashboardActivity
 import com.phoneclaw.app.wave.ProviderSecretsActivity
 import com.phoneclaw.app.wave.ResourceMonitorActivity
@@ -22,11 +21,9 @@ class SetupActivity : AppCompatActivity() {
 
         val (scroll, root) = UiFactory.screen(this)
         root.addView(UiFactory.title(this, "Wave D Controller Setup"))
-        root.addView(UiFactory.subtitle(this, "Minimal control screens for older Android devices."))
 
         root.addView(UiFactory.section(this, "Mandatory"))
         root.addView(navButton("Screen 2: Provider & Secrets", ProviderSecretsActivity::class.java))
-        root.addView(navButton("Screen 3: Channel Chat Setup", ChannelChatSetupActivity::class.java))
 
         root.addView(UiFactory.section(this, "Operations"))
         root.addView(navButton("Screen 4: Skill Manifest Viewer & Permissions", SkillsPermissionsActivity::class.java))

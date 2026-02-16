@@ -1,9 +1,9 @@
 package com.phoneclaw.app.wave
 
-import com.phoneclaw.app.R
 import android.content.Context
 import android.graphics.Color
 import android.graphics.Typeface
+import android.graphics.drawable.GradientDrawable
 import android.text.InputType
 import android.view.Gravity
 import android.view.View
@@ -14,24 +14,62 @@ import android.widget.ScrollView
 import android.widget.TextView
 
 object UiFactory {
-    private const val COLOR_TEXT_PRIMARY = "#24323D"
-    private const val COLOR_TEXT_SECONDARY = "#4C6674"
-    private const val COLOR_TEXT_MUTED = "#6F8793"
-    private const val COLOR_SURFACE = "#F5F8FB"
-    private const val COLOR_SURFACE_ALT = "#EAF2F7"
-    private const val COLOR_PRIMARY = "#6C9EC1"
-    private const val COLOR_PRIMARY_DARK = "#5B87A7"
+    private const val COLOR_BG = "#1F1954"
+    private const val COLOR_CARD = "#33FFFFFF"
+    private const val COLOR_CARD_ALT = "#1FFFFFFF"
+    private const val COLOR_TEXT_PRIMARY = "#F3EEFF"
+    private const val COLOR_TEXT_SECONDARY = "#CDC2F5"
+    private const val COLOR_TEXT_MUTED = "#AA9ED8"
+    private const val COLOR_BORDER = "#66F5E6FF"
+    private const val COLOR_PRIMARY = "#9B4DFF"
+    private const val COLOR_PRIMARY_DARK = "#7B2FF7"
+    private const val COLOR_PRIMARY_SOFT = "#2EE6A8FF"
+
+    fun colorTextPrimary(): Int = Color.parseColor(COLOR_TEXT_PRIMARY)
+    fun colorTextSecondary(): Int = Color.parseColor(COLOR_TEXT_SECONDARY)
+    fun colorPrimaryDark(): Int = Color.parseColor(COLOR_PRIMARY_DARK)
+    fun colorPrimarySoft(): Int = Color.parseColor(COLOR_PRIMARY_SOFT)
+    fun colorBorder(): Int = Color.parseColor(COLOR_BORDER)
+
+    private fun roundedBackground(fill: String, stroke: String? = null, radius: Float = 22f): GradientDrawable {
+        return GradientDrawable().apply {
+            shape = GradientDrawable.RECTANGLE
+            cornerRadius = radius
+            setColor(Color.parseColor(fill))
+            if (stroke != null) {
+                setStroke(2, Color.parseColor(stroke))
+            }
+        }
+    }
+
+    private fun neonActionBackground(): GradientDrawable {
+        return GradientDrawable(
+            GradientDrawable.Orientation.LEFT_RIGHT,
+            intArrayOf(
+                Color.parseColor("#FF4D9E"),
+                Color.parseColor("#FF6A4D"),
+            )
+        ).apply {
+            shape = GradientDrawable.RECTANGLE
+            cornerRadius = 14f
+            setStroke(2, Color.parseColor("#66FFFFFF"))
+        }
+    }
 
     fun screen(context: Context): Pair<ScrollView, LinearLayout> {
         val scroll = ScrollView(context).apply {
-            setBackgroundResource(R.drawable.pastel)
-            setPadding(36, 36, 36, 36)
+            setBackgroundColor(Color.parseColor(COLOR_BG))
+            setPadding(12, 12, 12, 12)
         }
         val root = LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
-            gravity = Gravity.CENTER_HORIZONTAL
-            setBackgroundColor(Color.parseColor("#CCFFFFFF"))
-            setPadding(24, 24, 24, 24)
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+            background = roundedBackground(COLOR_CARD, COLOR_BORDER, 22f)
+            elevation = 7f
+            setPadding(14, 14, 14, 14)
         }
         scroll.addView(root)
         return Pair(scroll, root)
@@ -39,39 +77,39 @@ object UiFactory {
 
     fun title(context: Context, text: String): TextView = TextView(context).apply {
         this.text = text
-        textSize = 24f
-        setTextColor(Color.parseColor(COLOR_TEXT_PRIMARY))
+        textSize = 21f
+        setTextColor(colorTextPrimary())
         typeface = Typeface.DEFAULT_BOLD
-        setPadding(0, 16, 0, 8)
+        setPadding(0, 0, 0, 6)
     }
 
     fun subtitle(context: Context, text: String): TextView = TextView(context).apply {
         this.text = text
-        textSize = 13f
-        setTextColor(Color.parseColor(COLOR_TEXT_SECONDARY))
-        setPadding(0, 0, 0, 28)
+        textSize = 12f
+        setTextColor(colorTextSecondary())
+        setPadding(0, 0, 0, 12)
     }
 
     fun section(context: Context, text: String): TextView = TextView(context).apply {
         this.text = text
-        textSize = 17f
-        setTextColor(Color.parseColor(COLOR_PRIMARY_DARK))
+        textSize = 15f
+        setTextColor(colorPrimaryDark())
         typeface = Typeface.DEFAULT_BOLD
-        setPadding(0, 20, 0, 10)
+        setPadding(0, 10, 0, 7)
     }
 
     fun label(context: Context, text: String): TextView = TextView(context).apply {
         this.text = text
-        textSize = 13f
-        setTextColor(Color.parseColor(COLOR_TEXT_PRIMARY))
-        setPadding(0, 8, 0, 6)
+        textSize = 12f
+        setTextColor(colorTextPrimary())
+        setPadding(0, 6, 0, 4)
     }
 
     fun hint(context: Context, text: String): TextView = TextView(context).apply {
         this.text = text
-        textSize = 11f
+        textSize = 10f
         setTextColor(Color.parseColor(COLOR_TEXT_MUTED))
-        setPadding(0, 4, 0, 14)
+        setPadding(0, 2, 0, 8)
     }
 
     fun input(context: Context, hint: String, multiline: Boolean = false, secret: Boolean = false): EditText {
@@ -84,11 +122,11 @@ object UiFactory {
         return EditText(context).apply {
             this.hint = hint
             this.inputType = inputType
-            textSize = 14f
-            setTextColor(Color.parseColor(COLOR_TEXT_PRIMARY))
+            textSize = 12f
+            setTextColor(colorTextPrimary())
             setHintTextColor(Color.parseColor(COLOR_TEXT_MUTED))
-            setBackgroundColor(Color.parseColor(COLOR_SURFACE))
-            setPadding(20, 20, 20, 20)
+            background = roundedBackground(COLOR_CARD_ALT, COLOR_BORDER, 14f)
+            setPadding(18, 14, 18, 14)
             if (multiline) {
                 minLines = 3
                 gravity = Gravity.TOP or Gravity.START
@@ -96,23 +134,44 @@ object UiFactory {
         }
     }
 
-    fun spacer(context: Context, h: Int = 18): View = View(context).apply {
+    fun spacer(context: Context, h: Int = 8): View = View(context).apply {
         layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, h)
     }
 
     fun actionButton(context: Context, text: String): Button = Button(context).apply {
         this.text = text
-        textSize = 15f
+        textSize = 13f
+        isAllCaps = false
         setTextColor(Color.WHITE)
-        setBackgroundColor(Color.parseColor(COLOR_PRIMARY))
-        setPadding(20, 22, 20, 22)
+        background = neonActionBackground()
+        setPadding(16, 14, 16, 14)
+        minHeight = 0
+    }
+
+    fun chipButton(context: Context, text: String): Button = Button(context).apply {
+        this.text = text
+        textSize = 11f
+        isAllCaps = false
+        setTextColor(colorTextPrimary())
+        background = roundedBackground(COLOR_CARD_ALT, COLOR_BORDER, 999f)
+        setPadding(14, 10, 14, 10)
+        minHeight = 0
     }
 
     fun secondaryButton(context: Context, text: String): Button = Button(context).apply {
         this.text = text
-        textSize = 14f
-        setTextColor(Color.parseColor(COLOR_TEXT_PRIMARY))
-        setBackgroundColor(Color.parseColor(COLOR_SURFACE_ALT))
-        setPadding(20, 18, 20, 18)
+        textSize = 12f
+        isAllCaps = false
+        setTextColor(colorTextPrimary())
+        background = roundedBackground(COLOR_CARD_ALT, COLOR_BORDER, 14f)
+        setPadding(16, 12, 16, 12)
+        minHeight = 0
+    }
+
+    fun surfaceCard(context: Context): LinearLayout = LinearLayout(context).apply {
+        orientation = LinearLayout.VERTICAL
+        background = roundedBackground(COLOR_CARD_ALT, COLOR_BORDER, 14f)
+        setPadding(12, 12, 12, 12)
+        elevation = 1f
     }
 }
