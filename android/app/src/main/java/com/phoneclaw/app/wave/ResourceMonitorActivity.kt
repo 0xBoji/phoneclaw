@@ -18,7 +18,7 @@ class ResourceMonitorActivity : AppCompatActivity() {
 
         val (scroll, root) = UiFactory.screen(this)
         root.addView(UiFactory.title(this, "Screen 6: Event Stream Monitor"))
-        root.addView(UiFactory.subtitle(this, "Chi hien gateway event stream (WS)."))
+        root.addView(UiFactory.subtitle(this, "Display gateway event stream only (WebSocket)."))
 
         val eventsHeader = UiFactory.label(this, "Gateway Events (WebSocket)")
         root.addView(eventsHeader)

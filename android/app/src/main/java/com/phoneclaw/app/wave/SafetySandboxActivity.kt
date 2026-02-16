@@ -30,7 +30,7 @@ class SafetySandboxActivity : AppCompatActivity() {
 
         val (scroll, root) = UiFactory.screen(this)
         root.addView(UiFactory.title(this, "Screen 7: Safety & Sandbox"))
-        root.addView(UiFactory.subtitle(this, "Cau hinh gioi han toan cho tool execution/network."))
+        root.addView(UiFactory.subtitle(this, "Configure safety limits for tool execution/network."))
 
         val execToggle = CheckBox(this).apply {
             text = "Enable exec_cmd"
@@ -54,7 +54,7 @@ class SafetySandboxActivity : AppCompatActivity() {
         allowlistInput.setText(config.sandboxNetworkAllowlist)
         root.addView(allowlistInput)
 
-        root.addView(UiFactory.hint(this, "Luu y: backend hien tai co the chua ap dung day du truong sandbox trong config."))
+        root.addView(UiFactory.hint(this, "Note: backend support for all sandbox fields may be partial."))
 
         root.addView(UiFactory.section(this, "Performance (Android old devices)"))
         val liteToggle = CheckBox(this).apply {
@@ -116,7 +116,7 @@ class SafetySandboxActivity : AppCompatActivity() {
             }
 
             store.save(config)
-            Toast.makeText(this, "Da luu safety settings", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Safety settings saved", Toast.LENGTH_SHORT).show()
             finish()
         }
         root.addView(saveBtn)

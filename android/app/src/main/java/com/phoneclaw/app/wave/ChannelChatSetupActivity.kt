@@ -13,7 +13,7 @@ class ChannelChatSetupActivity : AppCompatActivity() {
 
         val (scroll, root) = UiFactory.screen(this)
         root.addView(UiFactory.title(this, "Screen 3: Channel Chat Setup"))
-        root.addView(UiFactory.subtitle(this, "Cau hinh Telegram/Discord/Slack/WhatsApp va test API message local."))
+        root.addView(UiFactory.subtitle(this, "Configure Telegram/Discord/Slack/WhatsApp and run a local API smoke test."))
 
         root.addView(UiFactory.section(this, "Telegram"))
         root.addView(UiFactory.label(this, "Telegram Bot Token"))
@@ -94,7 +94,7 @@ class ChannelChatSetupActivity : AppCompatActivity() {
             config.whatsappVerifyToken = whatsappVerifyTokenInput.text.toString().trim()
             config.whatsappAppSecret = whatsappAppSecretInput.text.toString().trim()
             store.save(config)
-            Toast.makeText(this, "Da luu channel setup", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Channel setup saved", Toast.LENGTH_SHORT).show()
             finish()
         }
         root.addView(saveBtn)

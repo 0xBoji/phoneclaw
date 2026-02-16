@@ -14,19 +14,19 @@ class WorkspaceCreatorActivity : AppCompatActivity() {
 
         val (scroll, root) = UiFactory.screen(this)
         root.addView(UiFactory.title(this, "Screen 1: Workspace Creator"))
-        root.addView(UiFactory.subtitle(this, "Chon workspace local de chay gateway tren Android."))
+        root.addView(UiFactory.subtitle(this, "Select a local workspace for Android gateway runtime."))
 
         root.addView(UiFactory.label(this, "Workspace Path"))
         val workspaceInput = UiFactory.input(this, File(filesDir, "workspace").absolutePath)
         workspaceInput.setText(if (config.workspace.isBlank()) File(filesDir, "workspace").absolutePath else config.workspace)
         root.addView(workspaceInput)
-        root.addView(UiFactory.hint(this, "Nen dung thu muc trong app storage de tranh loi quyen truy cap."))
+        root.addView(UiFactory.hint(this, "Use app-local storage to avoid permission issues."))
 
         val saveBtn = UiFactory.actionButton(this, "Save Workspace")
         saveBtn.setOnClickListener {
             val path = workspaceInput.text.toString().trim()
             if (path.isEmpty()) {
-                Toast.makeText(this, "Workspace path khong duoc rong", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Workspace path is required", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
@@ -35,7 +35,7 @@ class WorkspaceCreatorActivity : AppCompatActivity() {
 
             config.workspace = dir.absolutePath
             store.save(config)
-            Toast.makeText(this, "Da luu workspace", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Workspace saved", Toast.LENGTH_SHORT).show()
             finish()
         }
         root.addView(saveBtn)

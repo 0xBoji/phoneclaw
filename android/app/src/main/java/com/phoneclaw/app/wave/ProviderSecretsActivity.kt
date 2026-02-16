@@ -7,10 +7,6 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 
 class ProviderSecretsActivity : AppCompatActivity() {
-    private val assistantAddressOptions = arrayOf("minh", "toi", "tro ly")
-    private val userAddressOptions = arrayOf("ban", "anh/chi", "quy khach")
-    private val toneOptions = arrayOf("than thien, ngan gon", "chuyen nghiep", "tu nhien")
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -23,7 +19,7 @@ class ProviderSecretsActivity : AppCompatActivity() {
         val (scroll, root) = UiFactory.screen(this)
 
         root.addView(UiFactory.title(this, "Screen 2: Provider & Secrets"))
-        root.addView(UiFactory.subtitle(this, "Nguoi dung chi can config key + model la dung duoc."))
+        root.addView(UiFactory.subtitle(this, "Configure provider credentials and model selection."))
 
         root.addView(UiFactory.section(this, "LLM Provider"))
         root.addView(UiFactory.label(this, "Provider"))
@@ -48,40 +44,6 @@ class ProviderSecretsActivity : AppCompatActivity() {
         val promptInput = UiFactory.input(this, "You are a helpful AI assistant.", multiline = true)
         promptInput.setText(config.systemPrompt)
         root.addView(promptInput)
-
-        root.addView(UiFactory.section(this, "Addressing"))
-        root.addView(UiFactory.label(this, "Assistant refers to self as"))
-        val assistantSpinner = Spinner(this).apply {
-            adapter = ArrayAdapter(
-                this@ProviderSecretsActivity,
-                android.R.layout.simple_spinner_dropdown_item,
-                assistantAddressOptions
-            )
-            setSelection(assistantAddressOptions.indexOf(config.assistantSelfAddress).coerceAtLeast(0))
-        }
-        root.addView(assistantSpinner)
-
-        root.addView(UiFactory.label(this, "Assistant addresses user as"))
-        val userSpinner = Spinner(this).apply {
-            adapter = ArrayAdapter(
-                this@ProviderSecretsActivity,
-                android.R.layout.simple_spinner_dropdown_item,
-                userAddressOptions
-            )
-            setSelection(userAddressOptions.indexOf(config.userAddress).coerceAtLeast(0))
-        }
-        root.addView(userSpinner)
-
-        root.addView(UiFactory.label(this, "Tone"))
-        val toneSpinner = Spinner(this).apply {
-            adapter = ArrayAdapter(
-                this@ProviderSecretsActivity,
-                android.R.layout.simple_spinner_dropdown_item,
-                toneOptions
-            )
-            setSelection(toneOptions.indexOf(config.addressingTone).coerceAtLeast(0))
-        }
-        root.addView(toneSpinner)
 
         root.addView(UiFactory.section(this, "Extra Secrets"))
         root.addView(UiFactory.label(this, "Groq API Key (voice optional)"))
@@ -115,7 +77,7 @@ class ProviderSecretsActivity : AppCompatActivity() {
             val key = apiKeyInput.text.toString().trim()
             val model = selectedModel.trim()
             if (key.isBlank() || model.isBlank()) {
-                Toast.makeText(this, "API key va model la bat buoc", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "API key and model are required", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
@@ -123,9 +85,6 @@ class ProviderSecretsActivity : AppCompatActivity() {
             config.apiKey = key
             config.model = model
             config.systemPrompt = promptInput.text.toString().trim().ifBlank { "You are a helpful AI assistant." }
-            config.assistantSelfAddress = assistantSpinner.selectedItem.toString()
-            config.userAddress = userSpinner.selectedItem.toString()
-            config.addressingTone = toneSpinner.selectedItem.toString()
             config.groqKey = groqInput.text.toString().trim()
             config.braveKey = braveInput.text.toString().trim()
             config.gatewayAuthToken = authTokenInput.text.toString().trim()
@@ -133,7 +92,7 @@ class ProviderSecretsActivity : AppCompatActivity() {
             config.serviceAccountJson = serviceAccountInput.text.toString().trim()
 
             store.save(config)
-            Toast.makeText(this, "Da luu provider/secrets", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Provider settings saved", Toast.LENGTH_SHORT).show()
             finish()
         }
         root.addView(saveBtn)

@@ -77,7 +77,12 @@ impl ContextBuilder {
 
         // 1. System Prompt
         let system_prompt = self.build_system_prompt();
-        messages.push(Message::new("system", "global", Role::System, &system_prompt));
+        messages.push(Message::new(
+            "system",
+            "global",
+            Role::System,
+            &system_prompt,
+        ));
 
         // 2. Summary (Long-term memory or compressed context)
         if let Some(s) = summary {
@@ -122,12 +127,7 @@ impl ContextBuilder {
         messages.extend_from_slice(history_window);
 
         // 5. Current Message
-        messages.push(Message::new(
-            "cli",
-            "current",
-            Role::User,
-            current_message,
-        ));
+        messages.push(Message::new("cli", "current", Role::User, current_message));
 
         messages
     }
@@ -136,7 +136,9 @@ impl ContextBuilder {
         let mut prompt = String::from("You are PhoneClaw, an intelligent AI assistant.\n");
         prompt.push_str("You must answer the user's request accurately and concisely.\n");
         prompt.push_str("If you need to perform actions, use the provided tools.\n");
-        prompt.push_str("When user asks to search the web/news/latest info, prefer `web_search` first.\n");
+        prompt.push_str(
+            "When user asks to search the web/news/latest info, prefer `web_search` first.\n",
+        );
 
         // Load workspace context files if they exist
         let context_files = ["AGENTS.md", "SOUL.md", "USER.md", "TOOLS.md", "IDENTITY.md"];

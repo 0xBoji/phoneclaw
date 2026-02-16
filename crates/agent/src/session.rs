@@ -1,9 +1,9 @@
+use crate::sheets::SheetsClient;
+use phoneclaw_core::types::Message;
+use phoneclaw_persistence::SqliteSessionStore;
 use std::collections::HashMap;
 use std::sync::{Arc, RwLock};
 use std::time::{Duration, Instant};
-use phoneclaw_core::types::Message;
-use phoneclaw_persistence::SqliteSessionStore;
-use crate::sheets::SheetsClient;
 use tracing::{error, info};
 
 pub struct Session {
@@ -20,8 +20,8 @@ pub struct SessionManager {
 
 impl SessionManager {
     pub fn new(store: SqliteSessionStore, sheets_client: Option<SheetsClient>) -> Self {
-        Self { 
-            store, 
+        Self {
+            store,
             sheets_client,
             last_summary: Arc::new(RwLock::new(HashMap::new())),
         }
@@ -88,7 +88,7 @@ impl SessionManager {
                 return false;
             }
         }
-        
+
         true
     }
 

@@ -24,7 +24,7 @@ class ControllerDashboardActivity : AppCompatActivity() {
 
         val (scroll, root) = UiFactory.screen(this)
         root.addView(UiFactory.title(this, "Agent Control Dashboard"))
-        root.addView(UiFactory.subtitle(this, "Dieu khien server local va dieu huong 2/3/4/monitor."))
+        root.addView(UiFactory.subtitle(this, "Control local server and navigate screens 2/3/4/monitor."))
 
         statusText = UiFactory.label(this, "Status: Ready")
         root.addView(statusText)
@@ -56,7 +56,7 @@ class ControllerDashboardActivity : AppCompatActivity() {
                     if (result.isSuccess) {
                         Toast.makeText(this, "Reload triggered", Toast.LENGTH_SHORT).show()
                     } else {
-                        Toast.makeText(this, "Reload fail: ${result.exceptionOrNull()?.message}", Toast.LENGTH_LONG).show()
+                        Toast.makeText(this, "Reload failed: ${result.exceptionOrNull()?.message}", Toast.LENGTH_LONG).show()
                     }
                 }
             }.start()

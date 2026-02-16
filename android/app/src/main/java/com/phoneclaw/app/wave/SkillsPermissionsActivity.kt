@@ -19,7 +19,7 @@ class SkillsPermissionsActivity : AppCompatActivity() {
 
         val (scroll, root) = UiFactory.screen(this)
         root.addView(UiFactory.title(this, "Screen 4: Skill Permissions"))
-        root.addView(UiFactory.subtitle(this, "Xem skill manifests trong workspace va cap quyen su dung."))
+        root.addView(UiFactory.subtitle(this, "Review workspace skill manifests and grant permissions."))
         root.addView(UiFactory.hint(this, "Workspace: ${config.workspace}"))
         root.addView(UiFactory.hint(this, "Scan path: ${File(config.workspace, "skills").absolutePath}"))
 
@@ -29,7 +29,7 @@ class SkillsPermissionsActivity : AppCompatActivity() {
         val switches = mutableListOf<Pair<String, Switch>>()
 
         if (skills.isEmpty()) {
-            root.addView(UiFactory.hint(this, "Khong tim thay skill nao trong workspace/skills"))
+            root.addView(UiFactory.hint(this, "No skills found in workspace/skills"))
         } else {
             for (skill in skills) {
                 val card = LinearLayout(this).apply {
@@ -70,7 +70,7 @@ class SkillsPermissionsActivity : AppCompatActivity() {
             }
             val obj = JSONObject().put("approved", arr)
             store.approvedSkillsFile().writeText(obj.toString(2))
-            Toast.makeText(this, "Da luu approved skills", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Approved skills saved", Toast.LENGTH_SHORT).show()
             finish()
         }
         root.addView(saveBtn)

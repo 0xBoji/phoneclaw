@@ -36,7 +36,7 @@ class SessionLiveActivity : AppCompatActivity() {
 
         val (scroll, root) = UiFactory.screen(this)
         root.addView(UiFactory.title(this, "Live Sessions + Chat Stream"))
-        root.addView(UiFactory.subtitle(this, "Xem session realtime, tai lich su, va gui tin nhan vao session."))
+        root.addView(UiFactory.subtitle(this, "View realtime sessions, inspect history, and send messages to a session."))
 
         selectedSessionText = UiFactory.label(this, "Selected session: (none)")
         root.addView(selectedSessionText)

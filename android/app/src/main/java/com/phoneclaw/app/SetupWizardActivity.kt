@@ -29,10 +29,6 @@ class SetupWizardActivity : AppCompatActivity() {
         "slack" to "Slack",
         "whatsapp" to "WhatsApp",
     )
-    private val assistantAddressOptions = arrayOf("minh", "toi", "tro ly")
-    private val userAddressOptions = arrayOf("ban", "anh/chi", "quy khach")
-    private val toneOptions = arrayOf("than thien, ngan gon", "chuyen nghiep", "tu nhien")
-
     private lateinit var store: AppConfigStore
     private lateinit var config: AppConfigData
 
@@ -45,9 +41,6 @@ class SetupWizardActivity : AppCompatActivity() {
     private var selectedChannel: String = "telegram"
     private var channelApiKey: String = ""
     private val channelKeyDrafts = mutableMapOf<String, String>()
-    private var assistantSelfAddress: String = "minh"
-    private var userAddress: String = "ban"
-    private var addressingTone: String = "than thien, ngan gon"
 
     private lateinit var contentRoot: LinearLayout
 
@@ -79,9 +72,6 @@ class SetupWizardActivity : AppCompatActivity() {
         channelKeyDrafts["whatsapp"] = config.whatsappToken
         selectedChannel = defaultChannel
         channelApiKey = channelKeyFor(selectedChannel)
-        assistantSelfAddress = config.assistantSelfAddress.takeIf { it in assistantAddressOptions } ?: "minh"
-        userAddress = config.userAddress.takeIf { it in userAddressOptions } ?: "ban"
-        addressingTone = config.addressingTone.takeIf { it in toneOptions } ?: "than thien, ngan gon"
 
         val frame = FrameLayout(this)
         val (scroll, root) = UiFactory.screen(this)
@@ -110,8 +100,8 @@ class SetupWizardActivity : AppCompatActivity() {
     private fun renderStep() {
         contentRoot.removeAllViews()
         contentRoot.addView(UiFactory.title(this, "PhoneClaw Setup Wizard"))
-        contentRoot.addView(UiFactory.subtitle(this, "Step ${step + 1}/7"))
-        contentRoot.addView(UiFactory.hint(this, progressDots(step, 7)))
+        contentRoot.addView(UiFactory.subtitle(this, "Step ${step + 1}/6"))
+        contentRoot.addView(UiFactory.hint(this, progressDots(step, 6)))
 
         when (step) {
             0 -> renderModeStep()
@@ -120,7 +110,6 @@ class SetupWizardActivity : AppCompatActivity() {
             3 -> renderModelStep()
             4 -> renderChannelStep()
             5 -> renderChannelKeyStep()
-            6 -> renderAddressingStep()
         }
 
         contentRoot.addView(UiFactory.spacer(this, 20))
@@ -249,63 +238,7 @@ class SetupWizardActivity : AppCompatActivity() {
             channelApiKey = it
             channelKeyDrafts[selectedChannel] = it
         })
-        contentRoot.addView(UiFactory.hint(this, "Press Next to configure addressing style."))
-    }
-
-    private fun renderAddressingStep() {
-        contentRoot.addView(UiFactory.section(this, "Addressing Style"))
-        contentRoot.addView(UiFactory.hint(this, "Applied from the first chat message after setup."))
-
-        contentRoot.addView(UiFactory.label(this, "Assistant refers to self as"))
-        val assistantSpinner = Spinner(this).apply {
-            adapter = ArrayAdapter(
-                this@SetupWizardActivity,
-                android.R.layout.simple_spinner_dropdown_item,
-                assistantAddressOptions
-            )
-            setSelection(assistantAddressOptions.indexOf(assistantSelfAddress).coerceAtLeast(0))
-        }
-        assistantSpinner.setOnItemSelectedListener(object : android.widget.AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: android.widget.AdapterView<*>?, view: android.view.View?, position: Int, id: Long) {
-                assistantSelfAddress = assistantAddressOptions[position]
-            }
-            override fun onNothingSelected(parent: android.widget.AdapterView<*>?) {}
-        })
-        contentRoot.addView(assistantSpinner)
-
-        contentRoot.addView(UiFactory.label(this, "Assistant addresses user as"))
-        val userSpinner = Spinner(this).apply {
-            adapter = ArrayAdapter(
-                this@SetupWizardActivity,
-                android.R.layout.simple_spinner_dropdown_item,
-                userAddressOptions
-            )
-            setSelection(userAddressOptions.indexOf(userAddress).coerceAtLeast(0))
-        }
-        userSpinner.setOnItemSelectedListener(object : android.widget.AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: android.widget.AdapterView<*>?, view: android.view.View?, position: Int, id: Long) {
-                userAddress = userAddressOptions[position]
-            }
-            override fun onNothingSelected(parent: android.widget.AdapterView<*>?) {}
-        })
-        contentRoot.addView(userSpinner)
-
-        contentRoot.addView(UiFactory.label(this, "Tone"))
-        val toneSpinner = Spinner(this).apply {
-            adapter = ArrayAdapter(
-                this@SetupWizardActivity,
-                android.R.layout.simple_spinner_dropdown_item,
-                toneOptions
-            )
-            setSelection(toneOptions.indexOf(addressingTone).coerceAtLeast(0))
-        }
-        toneSpinner.setOnItemSelectedListener(object : android.widget.AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: android.widget.AdapterView<*>?, view: android.view.View?, position: Int, id: Long) {
-                addressingTone = toneOptions[position]
-            }
-            override fun onNothingSelected(parent: android.widget.AdapterView<*>?) {}
-        })
-        contentRoot.addView(toneSpinner)
+        contentRoot.addView(UiFactory.hint(this, "After setup, you can teach naming style directly in chat."))
     }
 
     private fun renderNav() {
@@ -325,7 +258,7 @@ class SetupWizardActivity : AppCompatActivity() {
         }
         nav.addView(backBtn)
 
-        val nextBtn = UiFactory.actionButton(this, if (step == 6) "Done" else "Next")
+        val nextBtn = UiFactory.actionButton(this, if (step == 5) "Done" else "Next")
         nextBtn.setOnClickListener {
             onNext()
         }
@@ -351,7 +284,7 @@ class SetupWizardActivity : AppCompatActivity() {
             return
         }
 
-        if (step < 6) {
+        if (step < 5) {
             step += 1
             renderStep()
             return
@@ -372,10 +305,6 @@ class SetupWizardActivity : AppCompatActivity() {
             "slack" -> config.slackBotToken = channelApiKey
             "whatsapp" -> config.whatsappToken = channelApiKey
         }
-        config.assistantSelfAddress = assistantSelfAddress
-        config.userAddress = userAddress
-        config.addressingTone = addressingTone
-
         store.save(config)
         Toast.makeText(this, "Setup complete", Toast.LENGTH_SHORT).show()
         startActivity(Intent(this, ControllerDashboardActivity::class.java))
