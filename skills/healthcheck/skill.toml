@@ -1,0 +1,10 @@
+[metadata]
+name = "healthcheck"
+version = "0.1.0"
+description = "Gateway/channel health diagnostics and quick incident triage."
+always = true
+
+[permissions]
+tools = ["channel_health", "metrics_snapshot", "datetime_now"]
+fs_scope = "workspace"
+network_domains = ["127.0.0.1"]

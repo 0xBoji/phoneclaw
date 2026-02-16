@@ -10,6 +10,7 @@ Primary goal: user only needs to set `provider + api key + model`, then start th
 - Multi-channel gateway (Telegram/Discord/Slack/WhatsApp/Teams/Zalo/Google Chat)
 - Security-hardened defaults for mobile deployment
 - Rust release profile optimized for compact binaries
+- Built-in safe skills bundle: `weather`, `summarize`, `github`, `healthcheck`, `session-logs`
 
 ## Performance Snapshot (Measured)
 

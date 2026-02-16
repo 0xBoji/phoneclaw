@@ -1,0 +1,10 @@
+[metadata]
+name = "github"
+version = "0.1.0"
+description = "GitHub research skill using web_search (no shell/system access)."
+always = false
+
+[permissions]
+tools = ["web_search", "datetime_now"]
+fs_scope = "workspace"
+network_domains = ["api.search.brave.com"]

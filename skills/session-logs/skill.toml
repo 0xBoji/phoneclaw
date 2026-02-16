@@ -1,0 +1,9 @@
+[metadata]
+name = "session-logs"
+version = "0.1.0"
+description = "Inspect and summarize recent sessions for debugging/support."
+always = false
+
+[permissions]
+tools = ["sessions_list", "sessions_history", "datetime_now"]
+fs_scope = "workspace"

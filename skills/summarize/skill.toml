@@ -1,0 +1,10 @@
+[metadata]
+name = "summarize"
+version = "0.1.0"
+description = "Summarize recent info and conversation context safely."
+always = false
+
+[permissions]
+tools = ["web_search", "sessions_history", "datetime_now"]
+fs_scope = "workspace"
+network_domains = ["api.search.brave.com"]
