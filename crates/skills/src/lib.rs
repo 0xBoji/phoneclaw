@@ -242,29 +242,11 @@ impl SkillsLoader {
     }
 }
 
-fn open_skills_enabled() -> bool {
-    if let Ok(raw) = std::env::var("PHONECLAW_OPEN_SKILLS_ENABLED") {
-        let value = raw.trim().to_ascii_lowercase();
-        return !matches!(value.as_str(), "0" | "false" | "off" | "no");
-    }
-    true
-}
-
 fn resolve_open_skills_dir() -> Option<PathBuf> {
-    if let Ok(path) = std::env::var("PHONECLAW_OPEN_SKILLS_DIR") {
-        let trimmed = path.trim();
-        if !trimmed.is_empty() {
-            return Some(PathBuf::from(trimmed));
-        }
-    }
     UserDirs::new().map(|dirs| dirs.home_dir().join("open-skills"))
 }
 
 fn ensure_open_skills_repo() -> Option<PathBuf> {
-    if !open_skills_enabled() {
-        return None;
-    }
-
     let repo_dir = resolve_open_skills_dir()?;
 
     if !repo_dir.exists() {
