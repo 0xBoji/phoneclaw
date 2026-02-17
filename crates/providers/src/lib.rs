@@ -2,6 +2,7 @@ pub mod google;
 pub mod anthropic;
 pub mod openai;
 pub mod factory;
+pub mod reliable;
 use async_trait::async_trait;
 use phoneclaw_core::types::Message;
 
