@@ -14,13 +14,13 @@ Primary goal: user only needs to set `provider + api key + model`, then start th
 
 ## Performance Snapshot (Measured)
 
-Measured on the same machine (`Darwin arm64`, 2026-02-15) with release builds:
+Measured on the same machine (`Darwin arm64`, 2026-02-17) with release builds:
 
 | Metric | PhoneClaw |
 | --- | ---: |
 | Binary size (CLI release) | **~14 MB** |
-| CLI startup (`status`, warm) | **0.00-0.03s** |
-| Gateway idle RSS (~4s) | **~21.2 MB** |
+| CLI startup (`status`, warm) | **0.00-0.02s** |
+| Gateway idle RSS (~4s) | **~21.4 MB** |
 
 Notes:
 - PhoneClaw run included gateway subsystems (cron/heartbeat/metrics) enabled.
