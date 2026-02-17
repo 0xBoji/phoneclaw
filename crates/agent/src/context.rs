@@ -139,6 +139,33 @@ impl ContextBuilder {
         prompt.push_str(
             "When user asks to search the web/news/latest info, prefer `web_search` first.\n",
         );
+        prompt.push_str("Skills are listed below; read skill files on demand when needed.\n");
+
+        let skills = self.skills_loader.list_skills();
+        if !skills.is_empty() {
+            prompt.push_str("\n## Available Skills\n\n");
+            prompt.push_str("<available_skills>\n");
+            for skill in &skills {
+                let location = skill.location.clone().unwrap_or_else(|| {
+                    self.workspace
+                        .join("skills")
+                        .join(&skill.name)
+                        .join("SKILL.md")
+                });
+                prompt.push_str("  <skill>\n");
+                prompt.push_str(&format!("    <name>{}</name>\n", skill.name));
+                prompt.push_str(&format!(
+                    "    <description>{}</description>\n",
+                    skill.description
+                ));
+                prompt.push_str(&format!(
+                    "    <location>{}</location>\n",
+                    location.display()
+                ));
+                prompt.push_str("  </skill>\n");
+            }
+            prompt.push_str("</available_skills>\n");
+        }
 
         // Load workspace context files if they exist
         let context_files = ["AGENTS.md", "SOUL.md", "USER.md", "TOOLS.md", "IDENTITY.md"];

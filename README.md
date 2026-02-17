@@ -304,6 +304,19 @@ OpenRouter example:
 }
 ```
 
+### 3.3 Skills (ZeroClaw-style loader)
+
+- PhoneClaw now loads skills from:
+  - `workspace/skills/*` (`skill.toml` or `SKILL.toml`, fallback `SKILL.md`)
+  - community `open-skills` repo (`https://github.com/openai/skills.git`)
+- Open-skills behavior:
+  - auto clone if missing
+  - auto sync weekly
+  - graceful fallback to local copy if sync fails
+- Environment switches:
+  - `PHONECLAW_OPEN_SKILLS_ENABLED=false` to disable remote open-skills sync
+  - `PHONECLAW_OPEN_SKILLS_DIR=/custom/path` to override open-skills directory
+
 ---
 
 ## 4) Security Defaults
