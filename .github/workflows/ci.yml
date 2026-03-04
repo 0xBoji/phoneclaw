@@ -256,11 +256,14 @@ jobs:
       - name: Build release APK
         run: ./gradlew :app:assembleRelease
 
+      - name: Rename release APK
+        run: mv app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/phoneclaw.apk
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: zeroclaw_android
-          path: app/build/outputs/apk/release/app-release*.apk
+          name: phoneclaw
+          path: app/build/outputs/apk/release/phoneclaw.apk
 
   test:
     name: Test
