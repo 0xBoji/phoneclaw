@@ -50,6 +50,11 @@ dependencies {
 }
 
 publishing {
+    val githubRepository =
+        (System.getenv("GITHUB_REPOSITORY") ?: "0xBoji/phoneclaw")
+            .trim()
+            .ifEmpty { "0xBoji/phoneclaw" }
+
     publications {
         register<MavenPublication>("release") {
             groupId = "com.zeroclaw"
@@ -68,7 +73,7 @@ publishing {
         }
         maven {
             name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/Natfii/ZeroClaw-Android")
+            url = uri("https://maven.pkg.github.com/$githubRepository")
             credentials {
                 username = System.getenv("GITHUB_ACTOR") ?: ""
                 password = System.getenv("GITHUB_TOKEN") ?: ""
