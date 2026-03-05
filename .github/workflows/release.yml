@@ -47,6 +47,9 @@ jobs:
       - name: Install NDK
         run: sdkmanager "ndk;27.2.12479018"
 
+      - name: Install Android build-tools
+        run: sdkmanager "build-tools;35.0.0"
+
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: aarch64-linux-android,x86_64-linux-android
@@ -92,7 +95,18 @@ jobs:
 
       - name: Verify APK signature
         run: |
-          apksigner verify --print-certs app/build/outputs/apk/release/phoneclaw.apk | tee /tmp/apk-signing.txt
+          set -euo pipefail
+          SDK_ROOT="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-}}"
+          APKSIGNER="${SDK_ROOT}/build-tools/35.0.0/apksigner"
+          if [ ! -x "$APKSIGNER" ]; then
+            APKSIGNER="$(find "${SDK_ROOT}/build-tools" -type f -name apksigner 2>/dev/null | sort -V | tail -n 1 || true)"
+          fi
+          if [ -z "${APKSIGNER:-}" ] || [ ! -x "$APKSIGNER" ]; then
+            echo "::error::apksigner not found under Android SDK build-tools"
+            exit 1
+          fi
+
+          "$APKSIGNER" verify --print-certs app/build/outputs/apk/release/phoneclaw.apk | tee /tmp/apk-signing.txt
           grep -q "Signer #1 certificate DN:" /tmp/apk-signing.txt
 
       - name: Smoke test install/launch on emulator
