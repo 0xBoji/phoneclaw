@@ -210,6 +210,7 @@ class ZeroClawDaemonService : Service() {
      * flow-based. The foreground notification is posted immediately so the
      * system does not kill the service while waiting for I/O.
      */
+    @Suppress("CognitiveComplexMethod", "TooGenericExceptionCaught")
     private fun handleStartFromSettings() {
         val notification =
             notificationManager.buildNotification(ServiceState.STARTING)
@@ -624,6 +625,7 @@ class ZeroClawDaemonService : Service() {
      * detaches the foreground notification (keeping it visible as an
      * error indicator), and calls [stopSelf] to avoid a zombie service.
      */
+    @Suppress("CognitiveComplexMethod", "TooGenericExceptionCaught")
     private fun attemptStart(
         configToml: String,
         host: String,
