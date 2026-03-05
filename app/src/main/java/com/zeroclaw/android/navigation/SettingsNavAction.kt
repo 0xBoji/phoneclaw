@@ -1,5 +1,5 @@
 /*
- * Copyright 2026 ZeroClaw Community
+ * Copyright 2026 PhoneClaw Community
  *
  * Licensed under the MIT License. See LICENSE in the project root.
  */
@@ -29,7 +29,7 @@ sealed interface SettingsNavAction {
     /** Navigate to the log viewer screen. */
     data object LogViewer : SettingsNavAction
 
-    /** Navigate to the ZeroClaw Doctor screen. */
+    /** Navigate to the PhoneClaw Doctor screen. */
     data object Doctor : SettingsNavAction
 
     /** Navigate to the agent identity screen. */

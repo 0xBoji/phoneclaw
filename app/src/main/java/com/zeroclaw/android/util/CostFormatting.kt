@@ -1,4 +1,4 @@
-// Copyright 2026 ZeroClaw Community, MIT License
+// Copyright 2026 PhoneClaw Community, MIT License
 
 package com.zeroclaw.android.util
 

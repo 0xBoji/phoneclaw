@@ -1,5 +1,5 @@
 /*
- * Copyright 2026 ZeroClaw Community
+ * Copyright 2026 PhoneClaw Community
  *
  * Licensed under the MIT License. See LICENSE in the project root.
  */
@@ -13,7 +13,7 @@ import androidx.compose.ui.text.font.FontWeight
 import com.zeroclaw.android.R
 
 /**
- * Custom typography scale for ZeroClaw.
+ * Custom typography scale for PhoneClaw.
  *
  * Uses the Material 3 default type scale which already specifies line
  * heights in `sp` (not `dp`), ensuring correct behaviour under Android

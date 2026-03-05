@@ -1,4 +1,4 @@
-// Copyright 2026 ZeroClaw Community, MIT License
+// Copyright 2026 PhoneClaw Community, MIT License
 
 package com.zeroclaw.android.ui.screen.settings
 
@@ -29,7 +29,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.zeroclaw.android.ui.component.SectionHeader
 
-/** GitHub releases URL for the ZeroClaw-Android project. */
+/** GitHub releases URL for the PhoneClaw-Android project. */
 private const val RELEASES_URL = "https://github.com/0xBoji/phoneclaw/releases"
 
 /**

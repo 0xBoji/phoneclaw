@@ -1,5 +1,5 @@
 /*
- * Copyright 2026 ZeroClaw Community
+ * Copyright 2026 PhoneClaw Community
  *
  * Licensed under the MIT License. See LICENSE in the project root.
  */
@@ -41,7 +41,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 /**
- * Runs diagnostic checks against the ZeroClaw configuration, API keys,
+ * Runs diagnostic checks against the PhoneClaw configuration, API keys,
  * connectivity, daemon health, and system prerequisites.
  *
  * Each check category produces a list of [DiagnosticCheck] results that

@@ -1,5 +1,5 @@
 /*
- * Copyright 2026 ZeroClaw Community
+ * Copyright 2026 PhoneClaw Community
  *
  * Licensed under the MIT License. See LICENSE in the project root.
  */
@@ -495,7 +495,7 @@ private fun ProxySection(
         value = settings.proxyScope,
         onValueChange = { viewModel.updateProxyScope(it) },
         label = { Text("Scope") },
-        supportingText = { Text("zeroclaw or system") },
+        supportingText = { Text("phoneclaw or system") },
         singleLine = true,
         enabled = settings.proxyEnabled,
         modifier = Modifier.fillMaxWidth(),

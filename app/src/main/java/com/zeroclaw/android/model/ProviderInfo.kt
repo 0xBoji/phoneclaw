@@ -1,5 +1,5 @@
 /*
- * Copyright 2026 ZeroClaw Community
+ * Copyright 2026 PhoneClaw Community
  *
  * Licensed under the MIT License. See LICENSE in the project root.
  */
@@ -70,7 +70,7 @@ enum class ModelListFormat {
 }
 
 /**
- * Metadata describing a single AI provider supported by ZeroClaw.
+ * Metadata describing a single AI provider supported by PhoneClaw.
  *
  * @property id Canonical lowercase identifier matching the upstream factory key.
  * @property displayName Human-readable name for UI display.

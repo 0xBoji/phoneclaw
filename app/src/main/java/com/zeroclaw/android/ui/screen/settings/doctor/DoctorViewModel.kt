@@ -1,5 +1,5 @@
 /*
- * Copyright 2026 ZeroClaw Community
+ * Copyright 2026 PhoneClaw Community
  *
  * Licensed under the MIT License. See LICENSE in the project root.
  */
@@ -25,7 +25,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 /**
- * ViewModel for the ZeroClaw Doctor diagnostics screen.
+ * ViewModel for the PhoneClaw Doctor diagnostics screen.
  *
  * Orchestrates sequential execution of diagnostic check categories
  * and provides incremental UI updates as each category completes.

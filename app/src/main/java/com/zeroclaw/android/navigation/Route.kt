@@ -1,5 +1,5 @@
 /*
- * Copyright 2026 ZeroClaw Community
+ * Copyright 2026 PhoneClaw Community
  *
  * Licensed under the MIT License. See LICENSE in the project root.
  */
@@ -107,7 +107,7 @@ data class ChannelDetailRoute(
 @Serializable
 data object TerminalRoute
 
-/** ZeroClaw Doctor diagnostics screen. */
+/** PhoneClaw Doctor diagnostics screen. */
 @Serializable
 data object DoctorRoute
 

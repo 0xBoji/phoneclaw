@@ -1,5 +1,5 @@
 /*
- * Copyright 2026 ZeroClaw Community
+ * Copyright 2026 PhoneClaw Community
  *
  * Licensed under the MIT License. See LICENSE in the project root.
  */
@@ -63,7 +63,7 @@ data class DoctorState(
 )
 
 /**
- * ZeroClaw Doctor diagnostics screen.
+ * PhoneClaw Doctor diagnostics screen.
  *
  * Thin stateful wrapper that collects ViewModel flows and delegates
  * rendering to [DoctorContent].

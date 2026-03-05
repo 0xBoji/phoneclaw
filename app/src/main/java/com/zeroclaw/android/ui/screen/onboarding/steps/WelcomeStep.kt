@@ -1,5 +1,5 @@
 /*
- * Copyright 2026 ZeroClaw Community
+ * Copyright 2026 PhoneClaw Community
  *
  * Licensed under the MIT License. See LICENSE in the project root.
  */
@@ -67,7 +67,7 @@ private val CheckTextSpacing = 8.dp
 private val CardBottomSpacing = 24.dp
 
 /**
- * Welcome step introducing the user to ZeroClaw.
+ * Welcome step introducing the user to PhoneClaw.
  *
  * Renders a scrollable column with a hero icon, title, description,
  * a setup preview card listing what the wizard will configure, and
@@ -82,8 +82,8 @@ fun WelcomeStep(modifier: Modifier = Modifier) {
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Image(
-            painter = painterResource(R.drawable.zero_crab),
-            contentDescription = "Zero the crab, PhoneClaw mascot",
+            painter = painterResource(R.drawable.phoneclaw_mascot),
+            contentDescription = "PhoneClaw mascot",
             modifier = Modifier.size(HeroImageSize),
         )
 

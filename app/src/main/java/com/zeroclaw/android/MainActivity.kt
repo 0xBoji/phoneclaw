@@ -1,5 +1,5 @@
 /*
- * Copyright 2026 ZeroClaw Community
+ * Copyright 2026 PhoneClaw Community
  *
  * Licensed under the MIT License. See LICENSE in the project root.
  */
@@ -22,7 +22,7 @@ import com.zeroclaw.android.navigation.ZeroClawAppShell
 import com.zeroclaw.android.ui.theme.ZeroClawTheme
 
 /**
- * Main entry point for the ZeroClaw Android application.
+ * Main entry point for the PhoneClaw Android application.
  *
  * Sets up edge-to-edge display and delegates all UI to
  * [ZeroClawAppShell] which manages navigation, the adaptive

@@ -1,5 +1,5 @@
 /*
- * Copyright 2026 ZeroClaw Community
+ * Copyright 2026 PhoneClaw Community
  *
  * Licensed under the MIT License. See LICENSE in the project root.
  */
@@ -16,7 +16,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 
 /**
- * Badge indicating a plugin is an official ZeroClaw built-in.
+ * Badge indicating a plugin is an official PhoneClaw built-in.
  *
  * Uses [MaterialTheme.colorScheme.tertiaryContainer] to distinguish from
  * the category badge. The chip is non-interactive (disabled with custom

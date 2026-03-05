@@ -1,5 +1,5 @@
 /*
- * Copyright 2026 ZeroClaw Community
+ * Copyright 2026 PhoneClaw Community
  *
  * Licensed under the MIT License. See LICENSE in the project root.
  */
@@ -27,7 +27,7 @@ class VisionBridge(
     /**
      * Sends a vision (image + text) message to the configured provider.
      *
-     * Bypasses the `ZeroClaw` agent loop and calls the provider's multimodal
+     * Bypasses the `PhoneClaw` agent loop and calls the provider's multimodal
      * API directly. Returns the assistant's text response.
      *
      * Safe to call from the main thread; the underlying blocking FFI call is

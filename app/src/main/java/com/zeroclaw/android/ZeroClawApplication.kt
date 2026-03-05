@@ -1,5 +1,5 @@
 /*
- * Copyright 2026 ZeroClaw Community
+ * Copyright 2026 PhoneClaw Community
  *
  * Licensed under the MIT License. See LICENSE in the project root.
  */
@@ -71,7 +71,7 @@ import okhttp3.ConnectionPool
 import okhttp3.OkHttpClient
 
 /**
- * Application subclass that initialises the native ZeroClaw library and
+ * Application subclass that initialises the native PhoneClaw library and
  * shared service components.
  *
  * The native library is loaded once during process creation so that every

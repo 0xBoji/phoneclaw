@@ -1,5 +1,5 @@
 /*
- * Copyright 2026 ZeroClaw Community
+ * Copyright 2026 PhoneClaw Community
  *
  * Licensed under the MIT License. See LICENSE in the project root.
  */
@@ -427,7 +427,7 @@ data class GlobalTomlConfig(
 }
 
 /**
- * Builds a valid TOML configuration string for the ZeroClaw daemon.
+ * Builds a valid TOML configuration string for the PhoneClaw daemon.
  *
  * The upstream [Config][zeroclaw::config::Config] struct requires at minimum
  * a `default_temperature` field. This builder constructs a TOML document from

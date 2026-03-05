@@ -1,5 +1,5 @@
 /*
- * Copyright 2026 ZeroClaw Community
+ * Copyright 2026 PhoneClaw Community
  *
  * Licensed under the MIT License. See LICENSE in the project root.
  */
@@ -24,7 +24,7 @@ private val DarkColorScheme = darkColorScheme()
 private val LightColorScheme = lightColorScheme()
 
 /**
- * Application theme for ZeroClaw.
+ * Application theme for PhoneClaw.
  *
  * Uses Material You dynamic colour on Android 12+ and falls back to
  * the default Material 3 colour scheme on older API levels. Provides

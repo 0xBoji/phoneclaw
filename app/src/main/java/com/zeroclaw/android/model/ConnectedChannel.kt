@@ -1,5 +1,5 @@
 /*
- * Copyright 2026 ZeroClaw Community
+ * Copyright 2026 PhoneClaw Community
  *
  * Licensed under the MIT License. See LICENSE in the project root.
  */
@@ -53,7 +53,7 @@ data class ChannelFieldSpec(
 )
 
 /**
- * Supported chat channel types matching upstream ZeroClaw channel configurations.
+ * Supported chat channel types matching upstream PhoneClaw channel configurations.
  *
  * Each entry declares its display name, TOML section key, and the list of
  * configuration fields required by the upstream Rust struct.
@@ -404,7 +404,7 @@ enum class ChannelType(
     /**
      * Webhook channel.
      *
-     * **Deprecated in ZeroClaw v0.1.7** — the standalone webhook channel
+     * **Deprecated in PhoneClaw v0.1.7** — the standalone webhook channel
      * implementation has been removed upstream. Existing configurations
      * using this type will still be displayed for migration purposes, but
      * new channels of this type should not be created.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2026 ZeroClaw Community
+ * Copyright 2026 PhoneClaw Community
  *
  * Licensed under the MIT License. See LICENSE in the project root.
  */
@@ -48,7 +48,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 /**
- * Always-on foreground service that manages the ZeroClaw daemon lifecycle.
+ * Always-on foreground service that manages the PhoneClaw daemon lifecycle.
  *
  * Uses the `specialUse` foreground service type and [START_STICKY] to
  * ensure the daemon remains running across process restarts. Includes

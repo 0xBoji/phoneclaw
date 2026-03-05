@@ -1,5 +1,5 @@
 /*
- * Copyright 2026 ZeroClaw Community
+ * Copyright 2026 PhoneClaw Community
  *
  * Licensed under the MIT License. See LICENSE in the project root.
  */
@@ -21,7 +21,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
 /**
- * Quick Settings tile that toggles the ZeroClaw daemon on and off.
+ * Quick Settings tile that toggles the PhoneClaw daemon on and off.
  *
  * When the tile is visible in the notification shade, this service observes
  * [DaemonServiceBridge.serviceState] and maps each [ServiceState] to the

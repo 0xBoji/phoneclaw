@@ -1,4 +1,4 @@
-# Baseline profile for ZeroClaw-Android
+# Baseline profile for PhoneClaw-Android
 # Hand-written rules to hint ART ahead-of-time compilation for startup performance.
 # Prefix legend:
 #   H = Hot method (frequently executed)

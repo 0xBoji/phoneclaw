@@ -1,5 +1,5 @@
 /*
- * Copyright 2026 ZeroClaw Community
+ * Copyright 2026 PhoneClaw Community
  *
  * Licensed under the MIT License. See LICENSE in the project root.
  */
@@ -221,7 +221,7 @@ class DaemonServiceBridge(
     }
 
     /**
-     * Starts the ZeroClaw daemon with the provided configuration.
+     * Starts the PhoneClaw daemon with the provided configuration.
      *
      * Safe to call from the main thread; the underlying **blocking** FFI
      * call is dispatched to [Dispatchers.IO]. The native call may block
@@ -396,7 +396,7 @@ class DaemonServiceBridge(
     /**
      * Scaffolds the workspace directory with identity template files.
      *
-     * Creates the standard `ZeroClaw` workspace structure (5 subdirectories
+     * Creates the standard `PhoneClaw` workspace structure (5 subdirectories
      * and 8 markdown identity files) at `{dataDir}/workspace`.
      * Existing files are never overwritten (idempotent).
      *

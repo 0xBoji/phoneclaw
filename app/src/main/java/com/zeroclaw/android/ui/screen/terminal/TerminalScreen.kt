@@ -1,5 +1,5 @@
 /*
- * Copyright 2026 ZeroClaw Community
+ * Copyright 2026 PhoneClaw Community
  *
  * Licensed under the MIT License. See LICENSE in the project root.
  */
@@ -122,7 +122,7 @@ private const val DISMISS_ICON_DP = 10
 private const val PROCESSING_INDICATOR_DP = 14
 
 /**
- * Terminal REPL screen for interacting with the ZeroClaw daemon.
+ * Terminal REPL screen for interacting with the PhoneClaw daemon.
  *
  * Thin stateful wrapper that collects [TerminalViewModel] flows and
  * delegates rendering to [TerminalContent]. Provides the photo picker

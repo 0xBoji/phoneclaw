@@ -1,5 +1,5 @@
 /*
- * Copyright 2026 ZeroClaw Community
+ * Copyright 2026 PhoneClaw Community
  *
  * Licensed under the MIT License. See LICENSE in the project root.
  */
@@ -12,7 +12,7 @@ import com.zeroclaw.android.model.ProviderCategory
 import com.zeroclaw.android.model.ProviderInfo
 
 /**
- * Kotlin-side registry of AI providers supported by ZeroClaw.
+ * Kotlin-side registry of AI providers supported by PhoneClaw.
  *
  * Source of truth: `zeroclaw/src/providers/mod.rs` (factory function, lines 183-303).
  * This registry mirrors the upstream provider list so the UI can present structured

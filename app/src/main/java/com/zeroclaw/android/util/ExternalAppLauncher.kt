@@ -1,5 +1,5 @@
 /*
- * Copyright 2026 ZeroClaw Community
+ * Copyright 2026 PhoneClaw Community
  *
  * Licensed under the MIT License. See LICENSE in the project root.
  */
@@ -84,7 +84,7 @@ object ExternalAppLauncher {
     /**
      * Provider-ID-to-console-URL lookup for AI provider API-key pages.
      *
-     * Each entry maps a ZeroClaw provider identifier to the web console
+     * Each entry maps a PhoneClaw provider identifier to the web console
      * where the user can create or retrieve an API key.
      */
     private val PROVIDER_CONSOLES: Map<String, DeepLinkTarget> =
@@ -130,7 +130,7 @@ object ExternalAppLauncher {
      * Returns the API-key console [DeepLinkTarget] for the given provider, or null
      * if the provider is not recognised.
      *
-     * @param providerId ZeroClaw provider identifier (e.g. `"openai"`, `"anthropic"`).
+     * @param providerId PhoneClaw provider identifier (e.g. `"openai"`, `"anthropic"`).
      * @return The console target, or null for unknown providers.
      */
     fun providerConsoleTarget(providerId: String): DeepLinkTarget? = PROVIDER_CONSOLES[providerId]
